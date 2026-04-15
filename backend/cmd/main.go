@@ -1,15 +1,15 @@
 package main
 
 import (
+	"courses/internal/handler"
+	"courses/internal/router"
+	"courses/internal/service"
 	"fmt"
 	"log"
 	"net/http"
 
 	"courses/internal/config"
 	"courses/internal/repository"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
@@ -21,17 +21,10 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepository(db)
-	_ = userRepo
+	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService)
 
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
-
-	r.Get("/ping", func(w http.ResponseWriter, req *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("API rodando com variáveis de ambiente configuradas!"))
-	})
+	r := router.SetupRouter(userHandler)
 
 	port := fmt.Sprintf(":%s", env.APIPort)
 	fmt.Printf("🚀 Servidor iniciado na porta %s\n", port)

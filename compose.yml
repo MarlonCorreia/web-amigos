@@ -12,3 +12,6 @@ services:
     environment:
       - API_PORT=${API_PORT}
       - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      postgres_db:
+        condition: service_healthy

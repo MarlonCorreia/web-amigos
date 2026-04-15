@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
 	FindByEmail(ctx context.Context, email string) (*models.User, error)
+	FindByID(ctx context.Context, id string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -27,6 +28,15 @@ func (r *userRepository) Create(ctx context.Context, user *models.User) error {
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (*models.User, error) {
 	var user models.User
 	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (r *userRepository) FindByID(ctx context.Context, userID string) (*models.User, error) {
+	var user models.User
+	err := r.db.WithContext(ctx).Where("id = ?", userID).First(&user).Error
 	if err != nil {
 		return nil, err
 	}
