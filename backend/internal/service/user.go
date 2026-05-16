@@ -45,7 +45,7 @@ func (s *UserService) Create(ctx context.Context, req *models.CreateUserRequest)
 	return nil
 }
 
-func (s *UserService) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+func (s *UserService) GetByEmail(ctx context.Context, email string) (*models.UserResponse, error) {
 	if email == "" {
 		return nil, errors.New("email is required")
 	}
@@ -53,10 +53,18 @@ func (s *UserService) GetByEmail(ctx context.Context, email string) (*models.Use
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+
+	response := &models.UserResponse{
+		ID:       user.ID,
+		Email:    user.Email,
+		FullName: user.FullName,
+		Role:     user.Role,
+	}
+
+	return response, nil
 }
 
-func (s *UserService) GetByID(ctx context.Context, id string) (*models.User, error) {
+func (s *UserService) GetByID(ctx context.Context, id string) (*models.UserResponse, error) {
 	if id == "" {
 		return nil, errors.New("id is required")
 	}
@@ -64,5 +72,13 @@ func (s *UserService) GetByID(ctx context.Context, id string) (*models.User, err
 	if err != nil {
 		return nil, err
 	}
-	return user, nil
+
+	response := &models.UserResponse{
+		ID:       user.ID,
+		Email:    user.Email,
+		FullName: user.FullName,
+		Role:     user.Role,
+	}
+
+	return response, nil
 }
