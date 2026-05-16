@@ -23,11 +23,15 @@ func main() {
 	}
 
 	validate := validator.New()
+
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService, validate)
 
-	r := router.SetupRouter(userHandler)
+	authService := service.NewAuthService(userRepo, env.JWTSecret)
+	authHandler := handler.NewAuthHandler(authService)
+
+	r := router.SetupRouter(userHandler, authHandler)
 
 	port := fmt.Sprintf(":%s", env.APIPort)
 	fmt.Printf("🚀 Servidor iniciado na porta %s\n", port)

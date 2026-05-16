@@ -25,3 +25,20 @@ type CreateUserRequest struct {
 	FullName string `json:"full_name" validate:"required"`
 	Role     string `json:"role" validate:"required,oneof=admin creator student"`
 }
+
+type UserLoginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+type UserResponse struct {
+	ID       uuid.UUID `json:"id"`
+	Email    string    `json:"email"`
+	FullName string    `json:"full_name"`
+	Role     string    `json:"role"`
+}
+
+type UserResponseAuth struct {
+	UserResponse
+	Token string `json:"token"`
+}

@@ -10,6 +10,7 @@ import (
 type EnvConfig struct {
 	APIPort     string
 	DatabaseURL string
+	JWTSecret   string
 }
 
 func LoadEnv() *EnvConfig {
@@ -28,8 +29,14 @@ func LoadEnv() *EnvConfig {
 		log.Fatal("❌ A variável DATABASE_URL é obrigatória e não foi encontrada!")
 	}
 
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("❌ A variável JWTSecret é obrigatória e não foi encontrada!")
+	}
+
 	return &EnvConfig{
 		APIPort:     port,
 		DatabaseURL: dbURL,
+		JWTSecret:   jwtSecret,
 	}
 }
