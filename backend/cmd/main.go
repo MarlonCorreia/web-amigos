@@ -10,6 +10,8 @@ import (
 
 	"courses/internal/config"
 	"courses/internal/repository"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func main() {
@@ -20,9 +22,10 @@ func main() {
 		log.Fatalf("❌ Falha crítica ao conectar no banco: %v", err)
 	}
 
+	validate := validator.New()
 	userRepo := repository.NewUserRepository(db)
 	userService := service.NewUserService(userRepo)
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, validate)
 
 	r := router.SetupRouter(userHandler)
 

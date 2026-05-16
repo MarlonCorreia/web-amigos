@@ -18,3 +18,10 @@ type User struct {
 	Enrollments []Enrollment   `gorm:"foreignKey:UserID"`
 	Reviews     []CourseReview `gorm:"foreignKey:UserID"`
 }
+
+type CreateUserRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+	FullName string `json:"full_name" validate:"required"`
+	Role     string `json:"role" validate:"required,oneof=admin creator student"`
+}

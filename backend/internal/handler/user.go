@@ -4,28 +4,40 @@ import (
 	"courses/internal/models"
 	"courses/internal/service"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 )
 
 type UserHandler struct {
 	s *service.UserService
+	v *validator.Validate
 }
 
-func NewUserHandler(s *service.UserService) *UserHandler {
-	return &UserHandler{s: s}
+func NewUserHandler(s *service.UserService, v *validator.Validate) *UserHandler {
+	return &UserHandler{s: s, v: v}
 }
 
 func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var payload models.CreateUserRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := h.s.Create(r.Context(), &user); err != nil {
+	if err := h.v.Struct(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.s.Create(r.Context(), &payload); err != nil {
+		if errors.Is(err, service.ErrEmailAlreadyExists) {
+			http.Error(w, err.Error(), http.StatusConflict)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
