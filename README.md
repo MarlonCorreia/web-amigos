@@ -44,9 +44,14 @@ O repositório está organizado da seguinte forma:
 * **/frontend**: Código-fonte da aplicação client-side em React.
 * **/backend**: Código-fonte da API e lógica de servidor em Go.
 
+## Estrutura do Banco de Dados
+
+![schema_do_banco](database/schema.png)
+
 ## Membros do Grupo
 
-* Francisco de Paula Lemos
-* Andre Lemos Piucco
 * Eduardo Vinicius Faleiro
+* Francisco de Paula Lemos
 * Lucas dos Santos Santin
+* Lucas Gusmão Valduga
+* Marlon Correia
