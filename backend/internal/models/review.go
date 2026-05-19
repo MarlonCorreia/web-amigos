@@ -7,19 +7,24 @@ import (
 )
 
 type CourseReview struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	CourseID  uuid.UUID `gorm:"type:uuid;not null"`
-	Course    Course    `gorm:"foreignKey:CourseID"`
-	UserID    uuid.UUID `gorm:"type:uuid;not null"`
-	User      User      `gorm:"foreignKey:UserID"`
-	Rating    int       `gorm:"not null;check:rating >= 1 AND rating <= 5"`
-	Comment   string    `gorm:"type:text"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	CourseID  uuid.UUID `json:"course_id" gorm:"type:uuid;not null"`
+	Course    *Course   `json:"course,omitempty" gorm:"foreignKey:CourseID"`
+	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	User      *User     `json:"user,omitempty" gorm:"foreignKey:UserID"`
+	Rating    int       `json:"rating" gorm:"not null;check:rating >= 1 AND rating <= 5"`
+	Comment   string    `json:"comment" gorm:"type:text"`
+	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
 }
 
 type CourseReviewPayload struct {
 	CourseID string `json:"course_id" binding:"required,uuid"`
 	Rating   int    `json:"rating" binding:"required,min=1,max=5"`
 	Comment  string `json:"comment"`
+}
+
+type CourseReviewUpdatePayload struct {
+	Rating  int    `json:"rating" binding:"required,min=1,max=5"`
+	Comment string `json:"comment"`
 }

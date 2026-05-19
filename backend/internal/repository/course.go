@@ -9,3 +9,7 @@ type CourseRepository interface {
 type courseRepository struct {
 	db *gorm.DB
 }
+
+func NewCourseRepository(db *gorm.DB) CourseRepository {
+	return &courseRepository{db: db}
+}

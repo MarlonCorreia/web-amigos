@@ -9,7 +9,7 @@ import (
 	customMiddleware "courses/internal/middleware"
 )
 
-func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHandler, reviewHandler *handler.ReviewHandler, jwtSecret string) *chi.Mux {
+func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHandler, reviewHandler *handler.ReviewHandler, courseHandler *handler.CourseHandler, jwtSecret string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -18,6 +18,7 @@ func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 
 	r.Mount("/auth", AuthRoutes(authHandler))
 	r.Mount("/users", UserRoutes(userHandler, jwtSecret))
+	r.Mount("/courses", CourseRoutes(courseHandler, jwtSecret))
 
 	r.Group(func(r chi.Router) {
 		r.Use(customMiddleware.JWTAuth(jwtSecret))

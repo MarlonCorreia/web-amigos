@@ -12,6 +12,9 @@ func ReviewRoutes(h *handler.ReviewHandler) *chi.Mux {
 	r.Group(func(r chi.Router) {
 
 		r.Post("/", h.Create)
+		r.Get("/{id}", h.GetByID)
+		r.Delete("/{id}", h.Delete)
+		r.Put("/{id}", h.Update)
 	})
 
 	return r

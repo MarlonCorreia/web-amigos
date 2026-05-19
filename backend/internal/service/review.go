@@ -60,8 +60,14 @@ func (s *ReviewService) GetReviewByID(ctx context.Context, id string) (*models.C
 	return s.r.GetByID(ctx, id)
 }
 
-func (s *ReviewService) UpdateReview(ctx context.Context, review *models.CourseReview) error {
-	return s.r.Update(ctx, review)
+func (s *ReviewService) UpdateReview(ctx context.Context, review *models.CourseReviewUpdatePayload, id string) error {
+	existingReview, err := s.r.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	existingReview.Rating = review.Rating
+	existingReview.Comment = review.Comment
+	return s.r.Update(ctx, existingReview)
 }
 
 func (s *ReviewService) DeleteReview(ctx context.Context, id string) error {

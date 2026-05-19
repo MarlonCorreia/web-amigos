@@ -12,6 +12,7 @@ type ReviewRepository interface {
 	GetByID(ctx context.Context, id string) (*models.CourseReview, error)
 	Update(ctx context.Context, review *models.CourseReview) error
 	Delete(ctx context.Context, id string) error
+	CourseReviews(ctx context.Context, courseID string) ([]*models.CourseReview, error)
 }
 
 type reviewRepository struct {
@@ -41,4 +42,13 @@ func (r *reviewRepository) Update(ctx context.Context, review *models.CourseRevi
 
 func (r *reviewRepository) Delete(ctx context.Context, id string) error {
 	return r.db.WithContext(ctx).Where("id = ?", id).Delete(&models.CourseReview{}).Error
+}
+
+func (r *reviewRepository) CourseReviews(ctx context.Context, courseID string) ([]*models.CourseReview, error) {
+	var reviews []*models.CourseReview
+	err := r.db.WithContext(ctx).Where("course_id = ?", courseID).Find(&reviews).Error
+	if err != nil {
+		return nil, err
+	}
+	return reviews, nil
 }
