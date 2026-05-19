@@ -17,3 +17,9 @@ type CourseReview struct {
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
+
+type CourseReviewPayload struct {
+	CourseID string `json:"course_id" binding:"required,uuid"`
+	Rating   int    `json:"rating" binding:"required,min=1,max=5"`
+	Comment  string `json:"comment"`
+}
