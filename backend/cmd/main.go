@@ -31,7 +31,13 @@ func main() {
 	authService := service.NewAuthService(userRepo, env.JWTSecret)
 	authHandler := handler.NewAuthHandler(authService)
 
-	r := router.SetupRouter(userHandler, authHandler, env.JWTSecret)
+	enrollRepo := repository.NewEnrollmentRepository(db)
+
+	reviewRepo := repository.NewReviewRepository(db)
+	reviewService := service.NewReviewService(reviewRepo, enrollRepo)
+	reviewHandler := handler.NewReviewHandler(reviewService)
+
+	r := router.SetupRouter(userHandler, authHandler, reviewHandler, env.JWTSecret)
 
 	port := fmt.Sprintf(":%s", env.APIPort)
 	fmt.Printf("🚀 Servidor iniciado na porta %s\n", port)
