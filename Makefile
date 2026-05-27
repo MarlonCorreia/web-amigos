@@ -6,3 +6,6 @@ api:
 
 docs:
 	docker compose up swagger
+
+seed:
+	cd backend && go run cmd/seed/main.go
