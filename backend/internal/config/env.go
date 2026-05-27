@@ -12,6 +12,7 @@ type EnvConfig struct {
 	DatabaseURL    string
 	JWTSecret      string
 	AllowedOrigins string
+	BaseURL        string
 }
 
 func LoadEnv() *EnvConfig {
@@ -40,10 +41,16 @@ func LoadEnv() *EnvConfig {
 		allowedOrigins = "http://localhost:3000"
 	}
 
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "http://localhost:8080"
+	}
+
 	return &EnvConfig{
 		APIPort:        port,
 		DatabaseURL:    dbURL,
 		JWTSecret:      jwtSecret,
 		AllowedOrigins: allowedOrigins,
+		BaseURL:        baseURL,
 	}
 }
