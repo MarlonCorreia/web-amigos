@@ -8,9 +8,10 @@ import (
 )
 
 type EnvConfig struct {
-	APIPort     string
-	DatabaseURL string
-	JWTSecret   string
+	APIPort        string
+	DatabaseURL    string
+	JWTSecret      string
+	AllowedOrigins string
 }
 
 func LoadEnv() *EnvConfig {
@@ -34,9 +35,15 @@ func LoadEnv() *EnvConfig {
 		log.Fatal("❌ A variável JWTSecret é obrigatória e não foi encontrada!")
 	}
 
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		allowedOrigins = "http://localhost:3000"
+	}
+
 	return &EnvConfig{
-		APIPort:     port,
-		DatabaseURL: dbURL,
-		JWTSecret:   jwtSecret,
+		APIPort:        port,
+		DatabaseURL:    dbURL,
+		JWTSecret:      jwtSecret,
+		AllowedOrigins: allowedOrigins,
 	}
 }
