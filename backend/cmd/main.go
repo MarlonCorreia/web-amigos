@@ -39,9 +39,13 @@ func main() {
 
 	courseRepo := repository.NewCourseRepository(db)
 	courseService := service.NewCourseService(reviewRepo, courseRepo)
-	courseHandler := handler.NewCourseHandler(courseService)
 
-	r := router.SetupRouter(userHandler, authHandler, reviewHandler, courseHandler, env.JWTSecret, env.AllowedOrigins)
+	enrollService := service.NewEnrollmentService(enrollRepo, env.FrontendURL)
+	enrollHandler := handler.NewEnrollmentHandler(enrollService)
+
+	courseHandler := handler.NewCourseHandler(courseService, enrollService)
+
+	r := router.SetupRouter(userHandler, authHandler, reviewHandler, courseHandler, enrollHandler, env.JWTSecret, env.AllowedOrigins)
 
 	port := fmt.Sprintf(":%s", env.APIPort)
 	fmt.Printf("🚀 Servidor iniciado na porta %s\n", port)

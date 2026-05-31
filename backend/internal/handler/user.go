@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"courses/internal/middleware"
 	"courses/internal/models"
 	"courses/internal/service"
 	"encoding/json"
@@ -44,6 +45,19 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "user created"})
+}
+
+func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
+
+	user, err := h.s.GetByID(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
 }
 
 func (h *UserHandler) FindByEmail(w http.ResponseWriter, r *http.Request) {

@@ -10,7 +10,7 @@ import (
 	customMiddleware "courses/internal/middleware"
 )
 
-func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHandler, reviewHandler *handler.ReviewHandler, courseHandler *handler.CourseHandler, jwtSecret string, allowedOrigins string) *chi.Mux {
+func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHandler, reviewHandler *handler.ReviewHandler, courseHandler *handler.CourseHandler, enrollHandler *handler.EnrollmentHandler, jwtSecret string, allowedOrigins string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(cors.Handler(cors.Options{
@@ -23,14 +23,16 @@ func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/auth", AuthRoutes(authHandler))
-	r.Mount("/users", UserRoutes(userHandler, jwtSecret))
-	r.Mount("/courses", CourseRoutes(courseHandler, jwtSecret))
+	r.Mount("/users", UserRoutes(userHandler, enrollHandler, jwtSecret))
+	r.Mount("/courses", CourseRoutes(courseHandler, enrollHandler, jwtSecret))
 
 	r.Group(func(r chi.Router) {
 		r.Use(customMiddleware.JWTAuth(jwtSecret))
 
 		r.Mount("/reviews", ReviewRoutes(reviewHandler))
 	})
+
+	r.Post("/webhooks/gateway", enrollHandler.WebhookGateway)
 
 	return r
 }

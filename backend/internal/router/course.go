@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func CourseRoutes(h *handler.CourseHandler, jwtSecret string) *chi.Mux {
+func CourseRoutes(h *handler.CourseHandler, enrollHandler *handler.EnrollmentHandler, jwtSecret string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/{courseID}/reviews", h.GetReviews)
@@ -15,6 +15,9 @@ func CourseRoutes(h *handler.CourseHandler, jwtSecret string) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(customMiddleware.JWTAuth(jwtSecret))
 
+		r.Post("/{courseID}/enroll", enrollHandler.Enroll)
+		r.Get("/{courseID}/enroll", enrollHandler.GetEnrollmentStatus)
+		r.Get("/{courseID}/content", h.GetCourseContent)
 	})
 
 	return r
