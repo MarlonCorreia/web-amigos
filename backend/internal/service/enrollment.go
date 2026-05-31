@@ -14,11 +14,11 @@ import (
 
 type EnrollmentService struct {
 	enrollRepo repository.EnrollmentRepository
-	baseURL    string
+	frontendURL    string
 }
 
-func NewEnrollmentService(enrollRepo repository.EnrollmentRepository, baseURL string) *EnrollmentService {
-	return &EnrollmentService{enrollRepo: enrollRepo, baseURL: baseURL}
+func NewEnrollmentService(enrollRepo repository.EnrollmentRepository, frontendURL string) *EnrollmentService {
+	return &EnrollmentService{enrollRepo: enrollRepo, frontendURL: frontendURL}
 }
 
 type EnrollResponse struct {
@@ -81,8 +81,16 @@ func (s *EnrollmentService) ActivateByTransaction(ctx context.Context, transacti
 	return s.enrollRepo.ActivateEnrollmentByTransaction(ctx, transactionID, expiresAt)
 }
 
+func (s *EnrollmentService) GetUserEnrollments(ctx context.Context, userID string) ([]*models.Enrollment, error) {
+	return s.enrollRepo.GetActiveEnrollmentsByUser(ctx, userID)
+}
+
+func (s *EnrollmentService) HasActiveEnrollment(ctx context.Context, userID, courseID string) (bool, error) {
+	return s.enrollRepo.HasActiveEnrollment(ctx, userID, courseID)
+}
+
 func (s *EnrollmentService) buildEnrollResponse(transactionID, status string) *EnrollResponse {
-	paymentURL := fmt.Sprintf("%s/pay/%s", s.baseURL, transactionID)
+	paymentURL := fmt.Sprintf("%s/payment/%s", s.frontendURL, transactionID)
 	qrCodeURL := "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + url.QueryEscape(paymentURL)
 	return &EnrollResponse{
 		TransactionID: transactionID,

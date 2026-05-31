@@ -12,7 +12,7 @@ type EnvConfig struct {
 	DatabaseURL    string
 	JWTSecret      string
 	AllowedOrigins string
-	BaseURL        string
+	FrontendURL    string
 }
 
 func LoadEnv() *EnvConfig {
@@ -41,9 +41,9 @@ func LoadEnv() *EnvConfig {
 		allowedOrigins = "http://localhost:3000"
 	}
 
-	baseURL := os.Getenv("BASE_URL")
-	if baseURL == "" {
-		baseURL = "http://localhost:8080"
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
 	}
 
 	return &EnvConfig{
@@ -51,6 +51,6 @@ func LoadEnv() *EnvConfig {
 		DatabaseURL:    dbURL,
 		JWTSecret:      jwtSecret,
 		AllowedOrigins: allowedOrigins,
-		BaseURL:        baseURL,
+		FrontendURL:    frontendURL,
 	}
 }

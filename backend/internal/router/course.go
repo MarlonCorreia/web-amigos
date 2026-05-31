@@ -17,6 +17,7 @@ func CourseRoutes(h *handler.CourseHandler, enrollHandler *handler.EnrollmentHan
 
 		r.Post("/{courseID}/enroll", enrollHandler.Enroll)
 		r.Get("/{courseID}/enroll", enrollHandler.GetEnrollmentStatus)
+		r.Get("/{courseID}/content", h.GetCourseContent)
 	})
 
 	return r

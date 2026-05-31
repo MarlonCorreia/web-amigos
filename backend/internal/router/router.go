@@ -23,7 +23,7 @@ func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/auth", AuthRoutes(authHandler))
-	r.Mount("/users", UserRoutes(userHandler, jwtSecret))
+	r.Mount("/users", UserRoutes(userHandler, enrollHandler, jwtSecret))
 	r.Mount("/courses", CourseRoutes(courseHandler, enrollHandler, jwtSecret))
 
 	r.Group(func(r chi.Router) {
@@ -33,7 +33,6 @@ func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	})
 
 	r.Post("/webhooks/gateway", enrollHandler.WebhookGateway)
-	r.Get("/pay/{transactionID}", enrollHandler.PaymentPage)
 
 	return r
 }

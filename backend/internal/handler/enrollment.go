@@ -46,6 +46,19 @@ func (h *EnrollmentHandler) GetEnrollmentStatus(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(enrollment)
 }
 
+func (h *EnrollmentHandler) GetUserEnrollments(w http.ResponseWriter, r *http.Request) {
+	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
+
+	enrollments, err := h.s.GetUserEnrollments(r.Context(), userID)
+	if err != nil {
+		http.Error(w, "failed to fetch enrollments", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(enrollments)
+}
+
 func (h *EnrollmentHandler) WebhookGateway(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		TransactionID string `json:"transaction_id"`
@@ -62,62 +75,4 @@ func (h *EnrollmentHandler) WebhookGateway(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "approved"})
-}
-
-func (h *EnrollmentHandler) PaymentPage(w http.ResponseWriter, r *http.Request) {
-	transactionID := chi.URLParam(r, "transactionID")
-
-	html := `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Pagamento</title>
-  <style>
-    body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f5f5f5; }
-    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); text-align: center; max-width: 400px; }
-    button { background: #22c55e; color: white; border: none; padding: .75rem 2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-top: 1.5rem; }
-    button:disabled { background: #aaa; cursor: not-allowed; }
-    #msg { margin-top: 1rem; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h2>Confirmar Pagamento</h2>
-    <p>Clique abaixo para aprovar o pagamento e liberar o acesso ao curso.</p>
-    <p><small>Transação: ` + transactionID + `</small></p>
-    <button id="btn" onclick="approve()">Aprovar Pagamento</button>
-    <div id="msg"></div>
-  </div>
-  <script>
-    async function approve() {
-      const btn = document.getElementById('btn');
-      const msg = document.getElementById('msg');
-      btn.disabled = true;
-      btn.textContent = 'Processando...';
-      try {
-        const res = await fetch('/webhooks/gateway', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transaction_id: '` + transactionID + `' })
-        });
-        if (res.ok) {
-          msg.style.color = '#22c55e';
-          msg.textContent = 'Pagamento aprovado! Acesso liberado.';
-          btn.textContent = 'Pago';
-        } else {
-          throw new Error('Falha no pagamento');
-        }
-      } catch (e) {
-        msg.style.color = '#ef4444';
-        msg.textContent = 'Erro ao processar pagamento. Tente novamente.';
-        btn.disabled = false;
-        btn.textContent = 'Aprovar Pagamento';
-      }
-    }
-  </script>
-</body>
-</html>`
-
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(html))
 }
