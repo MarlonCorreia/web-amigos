@@ -37,13 +37,12 @@ func main() {
 	reviewService := service.NewReviewService(reviewRepo, enrollRepo)
 	reviewHandler := handler.NewReviewHandler(reviewService)
 
-	courseRepo := repository.NewCourseRepository(db)
-	courseService := service.NewCourseService(reviewRepo, courseRepo)
-
 	enrollService := service.NewEnrollmentService(enrollRepo, env.FrontendURL)
 	enrollHandler := handler.NewEnrollmentHandler(enrollService)
 
-	courseHandler := handler.NewCourseHandler(courseService, enrollService)
+	courseRepo := repository.NewCourseRepository(db)
+	courseService := service.NewCourseService(reviewRepo, courseRepo, enrollRepo)
+	courseHandler := handler.NewCourseHandler(courseService, enrollService, validate)
 
 	r := router.SetupRouter(userHandler, authHandler, reviewHandler, courseHandler, enrollHandler, env.JWTSecret, env.AllowedOrigins)
 

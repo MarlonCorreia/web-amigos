@@ -12,6 +12,7 @@ type EnrollmentRepository interface {
 	StatusCourseEnrollment(userID, courseID string) (string, error)
 	CreateEnrollment(ctx context.Context, enrollment *models.Enrollment) error
 	GetEnrollmentByUserAndCourse(ctx context.Context, userID, courseID string) (*models.Enrollment, error)
+	GetEnrollmentCountByCourse(ctx context.Context, courseID string) (int64, error)
 	ActivateEnrollmentByTransaction(ctx context.Context, transactionID string, expiresAt time.Time) error
 	GetActiveEnrollmentsByUser(ctx context.Context, userID string) ([]*models.Enrollment, error)
 	HasActiveEnrollment(ctx context.Context, userID, courseID string) (bool, error)
@@ -85,4 +86,13 @@ func (r *enrollmentRepository) HasActiveEnrollment(ctx context.Context, userID, 
 		Where("user_id = ? AND course_id = ? AND status = ? AND expires_at > ?", userID, courseID, "active", time.Now()).
 		Count(&count).Error
 	return count > 0, err
+}
+
+func (r *enrollmentRepository) GetEnrollmentCountByCourse(ctx context.Context, courseID string) (int64, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&models.Enrollment{}).
+		Where("course_id = ?", courseID).
+		Count(&count).Error
+	return count, err
 }
