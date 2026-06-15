@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Box, Button, CircularProgress, Container, Paper, Typography } from '@mui/material'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined'
 import { apiRequest } from '../../api/client'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
@@ -32,10 +32,10 @@ export default function PaymentPage() {
           {status === 'success' ? (
             <>
               <CheckCircleOutlineIcon sx={{ fontSize: 56, color: 'success.main', mb: 1 }} />
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Pagamento aprovado!
               </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Seu acesso ao curso foi liberado.
               </Typography>
               <Button variant="contained" fullWidth onClick={() => navigate('/courses')}>
@@ -45,10 +45,10 @@ export default function PaymentPage() {
           ) : status === 'error' ? (
             <>
               <ErrorOutlineIcon sx={{ fontSize: 56, color: 'error.main', mb: 1 }} />
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Falha no pagamento
               </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                 Não foi possível processar o pagamento. Tente novamente.
               </Typography>
               <Button variant="contained" fullWidth onClick={() => setStatus('idle')}>
@@ -57,13 +57,13 @@ export default function PaymentPage() {
             </>
           ) : (
             <>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                 Confirmar Pagamento
               </Typography>
-              <Typography variant="body2" color="text.secondary" mb={1}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                 Clique abaixo para aprovar o pagamento e liberar o acesso ao curso.
               </Typography>
-              <Typography variant="caption" color="text.secondary" display="block" mb={3}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 3 }}>
                 Transação: {transactionID}
               </Typography>
               <Button
