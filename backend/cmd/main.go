@@ -48,7 +48,11 @@ func main() {
 	moduleService := service.NewModuleService(moduleRepo)
 	moduleHandler := handler.NewModuleHandler(moduleService, validate)
 
-	r := router.SetupRouter(userHandler, authHandler, reviewHandler, courseHandler, moduleHandler, enrollHandler, env.JWTSecret, env.AllowedOrigins)
+	lessonRepo := repository.NewLessonRepository(db)
+	lessonService := service.NewLessonService(lessonRepo, moduleRepo)
+	lessonHandler := handler.NewLessonHandler(lessonService, validate)
+
+	r := router.SetupRouter(userHandler, authHandler, reviewHandler, courseHandler, moduleHandler, lessonHandler, enrollHandler, env.JWTSecret, env.AllowedOrigins)
 
 	port := fmt.Sprintf(":%s", env.APIPort)
 	fmt.Printf("🚀 Servidor iniciado na porta %s\n", port)

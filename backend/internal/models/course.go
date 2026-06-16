@@ -66,18 +66,3 @@ type UpdateCourseRequest struct {
 	Price              *float64   `json:"price,omitempty"`
 	AccessDurationDays *int       `json:"access_duration_days,omitempty"`
 }
-
-type Lesson struct {
-	ID              uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	ModuleID        uuid.UUID `gorm:"type:uuid;not null"`
-	Module          Module    `gorm:"foreignKey:ModuleID"`
-	CourseID        uuid.UUID `gorm:"type:uuid;not null"`
-	Course          Course    `gorm:"foreignKey:CourseID"`
-	Title           string    `gorm:"type:varchar(255);not null"`
-	Description     string    `gorm:"type:text"`
-	YoutubeID       string    `gorm:"type:varchar(255)"`
-	DurationMinutes int
-	Position        int       `gorm:"not null"`
-	IsFree          bool      `gorm:"default:false"`
-	CreatedAt       time.Time `gorm:"autoCreateTime"`
-}
