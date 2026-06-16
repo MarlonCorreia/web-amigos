@@ -1,11 +1,22 @@
 import { useState } from 'react';
-import { MenuItem, Menu, IconButton, Tooltip } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { MenuItem, Menu, IconButton, Tooltip, Divider, Typography } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 import Person from '@mui/icons-material/Person';
+import { useAuth } from '../hooks/useAuth';
 
 function UserMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const close = () => setAnchorEl(null);
+
+  const handleLogout = () => {
+    logout();
+    close();
+    navigate('/');
+  };
 
   return (
     <>
@@ -25,16 +36,30 @@ function UserMenu() {
         id="user-menu"
         anchorEl={anchorEl}
         open={open}
-        onClose={() => setAnchorEl(null)}
+        onClose={close}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem component={Link} to="/login" onClick={() => setAnchorEl(null)}>
-          Entrar
-        </MenuItem>
-        <MenuItem component={Link} to="/register" onClick={() => setAnchorEl(null)}>
-          Cadastrar
-        </MenuItem>
+        {isAuthenticated ? (
+          [
+            <Typography key="name" variant="body2" sx={{ px: 2, py: 1, color: 'text.secondary' }}>
+              {user?.full_name ?? user?.email}
+            </Typography>,
+            <Divider key="divider" />,
+            <MenuItem key="logout" onClick={handleLogout}>
+              Sair
+            </MenuItem>,
+          ]
+        ) : (
+          [
+            <MenuItem key="login" component={Link} to="/login" onClick={close}>
+              Entrar
+            </MenuItem>,
+            <MenuItem key="register" component={Link} to="/register" onClick={close}>
+              Cadastrar
+            </MenuItem>,
+          ]
+        )}
       </Menu>
     </>
   );
