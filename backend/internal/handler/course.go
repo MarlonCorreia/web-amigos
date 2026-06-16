@@ -126,13 +126,15 @@ func (h *CourseHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.s.Create(r.Context(), &payload); err != nil {
+	course, err := h.s.Create(r.Context(), &payload)
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "course created"})
+	json.NewEncoder(w).Encode(course)
 }
 
 func (h *CourseHandler) UpdateCourse(w http.ResponseWriter, r *http.Request) {

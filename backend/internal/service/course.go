@@ -73,7 +73,7 @@ func (s *CourseService) List(ctx context.Context, IsPublished bool) ([]*models.C
 	return coursesReponse, nil
 }
 
-func (s *CourseService) Create(ctx context.Context, req *models.CreateCourseRequest) error {
+func (s *CourseService) Create(ctx context.Context, req *models.CreateCourseRequest) (*models.CourseSimpleResponse, error) {
 
 	course := &models.Course{
 		Title:              req.Title,
@@ -88,9 +88,20 @@ func (s *CourseService) Create(ctx context.Context, req *models.CreateCourseRequ
 
 	err := s.courseRepo.Create(ctx, course)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+
+	response := &models.CourseSimpleResponse{
+		ID:                 course.ID,
+		Title:              course.Title,
+		Description:        course.Description,
+		ThumbnailURL:       course.ThumbnailURL,
+		Price:              course.Price,
+		AccessDurationDays: *course.AccessDurationDays,
+		IsPublished:        course.IsPublished,
+	}
+
+	return response, nil
 }
 
 func (s *CourseService) Update(ctx context.Context, req *models.UpdateCourseRequest, courseID string) error {

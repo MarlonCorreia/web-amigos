@@ -60,9 +60,7 @@ func (h *LessonHandler) CreateLessonHandler(w http.ResponseWriter, r *http.Reque
 	if payload.DurationMinutes == nil {
 		http.Error(w, "duration_minutes field is required and can't be empty", http.StatusBadRequest)
 		return
-
 	}
-
 	if payload.Position == nil {
 		http.Error(w, "position field is requuired and can't be empty", http.StatusBadRequest)
 		return
