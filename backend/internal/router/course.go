@@ -29,15 +29,18 @@ func CourseRoutes(h *handler.CourseHandler, moduleHandler *handler.ModuleHandler
 	r.Group(func(r chi.Router) {
 		r.Use(customMiddleware.JWTAuth(jwtSecret))
 
-		r.Get("/modules/{moduleID}", moduleHandler.GetModule)
-		r.Put("/modules/{moduleID}", moduleHandler.UpdateModule)
-		r.Delete("/modules/{moduleID}", moduleHandler.DeleteModule)
+		r.Route("/modules", func(r chi.Router) {
+			r.Get("/{moduleID}", moduleHandler.GetModule)
+			r.Put("/{moduleID}", moduleHandler.UpdateModule)
+			r.Delete("/{moduleID}", moduleHandler.DeleteModule)
+			r.Post("/{moduleID}/lessons", lessonHandler.CreateLessonHandler)
+			r.Get("/{moduleID}/lessons", lessonHandler.ListLessonsByModuleIDHandler)
 
-		r.Post("/modules/{moduleID}/lessons", lessonHandler.CreateLessonHandler)
-		r.Get("/modules/{moduleID}/lessons", lessonHandler.ListLessonsByModuleIDHandler)
-
-		r.Put("/modules/lessons/{lessonID}", lessonHandler.UpdateLessonHandler)
-		r.Delete("/modules/lessons/{lessonID}", lessonHandler.DeleteLessonHandler)
+			r.Route("/lessons", func(r chi.Router) {
+				r.Put("/{lessonID}", lessonHandler.UpdateLessonHandler)
+				r.Delete("/{lessonID}", lessonHandler.DeleteLessonHandler)
+			})
+		})
 
 	})
 
