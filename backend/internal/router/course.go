@@ -12,15 +12,11 @@ func CourseRoutes(h *handler.CourseHandler, moduleHandler *handler.ModuleHandler
 	r.Use(customMiddleware.JWTAuth(jwtSecret))
 
 	r.Get("/{courseID}/reviews", h.GetReviews)
-
 	r.Post("/", h.Create)
 	r.Get("/", h.List)
-
 	r.Put("/{courseID}", h.UpdateCourse)
 	r.Get("/{courseID}", h.GetCourse)
-
 	r.Delete("/{courseID}", h.DeleteCourse)
-
 	r.Patch("/{courseID}/publish", h.PublishCourse)
 
 	r.Post("/{courseID}/modules", moduleHandler.CreateModule)
