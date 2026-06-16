@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func CourseRoutes(h *handler.CourseHandler, enrollHandler *handler.EnrollmentHandler, jwtSecret string) *chi.Mux {
+func CourseRoutes(h *handler.CourseHandler, moduleHandler *handler.ModuleHandler, enrollHandler *handler.EnrollmentHandler, jwtSecret string) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(customMiddleware.JWTAuth(jwtSecret))
 
@@ -22,6 +22,17 @@ func CourseRoutes(h *handler.CourseHandler, enrollHandler *handler.EnrollmentHan
 	r.Delete("/{courseID}", h.DeleteCourse)
 
 	r.Patch("/{courseID}/publish", h.PublishCourse)
+
+	r.Post("/{courseID}/modules", moduleHandler.CreateModule)
+	r.Get("/{courseID}/modules", moduleHandler.ListModules)
+
+	r.Group(func(r chi.Router) {
+		r.Use(customMiddleware.JWTAuth(jwtSecret))
+
+		r.Get("/modules/{moduleID}", moduleHandler.GetModule)
+		r.Put("/modules/{moduleID}", moduleHandler.UpdateModule)
+		r.Delete("/modules/{moduleID}", moduleHandler.DeleteModule)
+	})
 
 	r.Group(func(r chi.Router) {
 		r.Use(customMiddleware.JWTAuth(jwtSecret))

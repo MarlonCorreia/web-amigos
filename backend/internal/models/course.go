@@ -67,17 +67,6 @@ type UpdateCourseRequest struct {
 	AccessDurationDays *int       `json:"access_duration_days,omitempty"`
 }
 
-type Module struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	CourseID  uuid.UUID `gorm:"type:uuid;not null"`
-	Course    Course    `gorm:"foreignKey:CourseID"`
-	Title     string    `gorm:"type:varchar(255);not null"`
-	Position  int       `gorm:"not null"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-
-	Lessons []Lesson
-}
-
 type Lesson struct {
 	ID              uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	ModuleID        uuid.UUID `gorm:"type:uuid;not null"`
