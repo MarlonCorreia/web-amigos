@@ -12,6 +12,7 @@ import (
 type contextKey string
 
 const UserIDKey contextKey = "user_id"
+const UserRoleKey contextKey = "user_role"
 
 func JWTAuth(secret string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -53,7 +54,14 @@ func JWTAuth(secret string) func(http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserIDKey, userID)
+			userRole, ok := claims["role"].(string)
+			if !ok {
+				http.Error(w, "user role not found in token", http.StatusUnauthorized)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserRoleKey, userRole)
+			ctx = context.WithValue(ctx, UserIDKey, userID)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
