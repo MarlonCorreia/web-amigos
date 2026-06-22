@@ -20,6 +20,7 @@ import {
   ExpandMore, 
   PeopleAlt 
 } from '@mui/icons-material'
+import { Link as RouterLink } from "react-router-dom";
 
 const PRIMARY_COLOR = '#b83a14'
 
@@ -97,7 +98,9 @@ export default function CourseDetailsPage() {
               <Typography variant="h4" component="span" sx={{ fontWeight: 'bold', color: '#1a1a1a' }}>
                 {course.price}
               </Typography>
-              <Button 
+              <Button
+                component={RouterLink}
+                to={`/payment/${id}`} 
                 variant="contained" 
                 sx={{ 
                   bgcolor: PRIMARY_COLOR, 
