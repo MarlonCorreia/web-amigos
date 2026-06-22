@@ -66,7 +66,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails })
       </Box>
 
       {/* Conteúdo de texto */}
-      <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <CardContent sx={{ flexGrow: 1, p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Typography 
           variant="caption" 
           color="text.secondary" 
@@ -95,7 +95,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails })
           color="text.secondary" 
           sx={{ 
             mb: 2, 
-            minHeight: '60px', 
+            minHeight: '36px', 
             display: '-webkit-box', 
             WebkitLineClamp: 3, 
             WebkitBoxOrient: 'vertical', 

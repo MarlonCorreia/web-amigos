@@ -23,7 +23,7 @@ const coursesData: Course[] = [
     description: 'Domine as competências essenciais de ciência de dados, incluindo análise, visualização e algoritmos iniciais.',
     rating: 4.8,
     students: '1.247',
-    author: 'Sarah Johnson',
+    author: 'Lucas',
     image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80',
   },
   {
@@ -34,7 +34,7 @@ const coursesData: Course[] = [
     description: 'Torne-se um designer profissional. Aprenda princípios de design, pesquisa de utilizador e prototipagem no Figma.',
     rating: 4.9,
     students: '843',
-    author: 'Emma Davis',
+    author: 'Lucas',
     image: 'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=600&q=80',
   },
   {
@@ -45,9 +45,10 @@ const coursesData: Course[] = [
     description: 'Compreenda os fundamentos do mercado. Desenvolva vantagens competitivas e lidere análises corporativas de sucesso.',
     rating: 4.5,
     students: '2.150',
-    author: 'Michael Brown',
+    author: 'Lucas',
     image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
-  }
+  },
+  
 ];
 
 
@@ -60,7 +61,7 @@ export default function CoursesPage() {
         </Typography>
         <Grid container spacing={4}>
           {coursesData.map((course) => (
-            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={course.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }} key={course.id}>
             <CourseCard 
               course={course} 
               //  onViewDetails={handleViewCourseDetails}
