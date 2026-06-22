@@ -26,7 +26,7 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
 
-export default function HomeHero() {
+export default function HomePage() {
   return (
     <Box
       sx={{
