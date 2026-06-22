@@ -5,6 +5,7 @@ import CoursesPage from './app/courses/page'
 import LoginPage from './app/login/page'
 import RegisterPage from './app/register/page'
 import PaymentPage from './app/payment/page'
+import CourseDetailsPage from './app/courseDetails/page'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/courseDetails/:id" element={<CourseDetailsPage />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

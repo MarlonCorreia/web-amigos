@@ -1,29 +1,30 @@
 
-interface Course {
-  id: number;
-  title: string;
-  category: string;
-  price: string;
-  description: string;
-  rating: number;
-  students: string;
-  author: string;
-  image: string;
-}
 
+import { Link as RouterLink } from "react-router-dom";
 import React from 'react';
 import { Card, Box, CardMedia, CardContent, Typography, Button } from '@mui/material';
 import StarRateRoundedIcon from '@mui/icons-material/StarRateRounded';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
  
 
-// Definimos quais propriedades o seu card vai aceitar externamente
 interface CourseCardProps {
-  course: Course;
-  onViewDetails?: (id: number) => void; // Callback tipada caso queira disparar uma ação ao clicar
+  course: {
+    id: number;
+    title: string;
+    category: string;
+    price: string;
+    description: string;
+    rating: number;
+    students: string;
+    author: string;
+    image: string;
+}
+    
 }
 
-export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails }) => {
+
+
+export const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   return (
     <Card 
       sx={{ 
@@ -38,7 +39,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails })
         }
       }}
     >
-      {/* Container da Imagem com Tag de Preço flutuante */}
+ 
       <Box sx={{ position: 'relative' }}>
         <CardMedia
           component="img"
@@ -65,7 +66,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails })
         </Box>
       </Box>
 
-      {/* Conteúdo de texto */}
+     
       <CardContent sx={{ flexGrow: 1, p: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <Typography 
           variant="caption" 
@@ -105,7 +106,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails })
           {course.description}
         </Typography>
 
-        {/* Estatísticas */}
+       
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <StarRateRoundedIcon sx={{ color: '#f59e0b', fontSize: 20 }} />
@@ -125,12 +126,13 @@ export const CourseCard: React.FC<CourseCardProps> = ({ course, onViewDetails })
           by {course.author}
         </Typography>
 
-        {/* Botão de Ação */}
+       
         <Button 
           variant="contained" 
           color="primary" 
           fullWidth 
-          onClick={() => onViewDetails?.(course.id)} // Dispara o evento se houver
+          component={RouterLink}
+          to={`/courseDetails/${course.id}`}
           sx={{ 
             mt: 'auto', 
             py: 1.2, 

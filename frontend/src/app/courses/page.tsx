@@ -1,7 +1,6 @@
 import { Typography, Container, Box, Grid } from '@mui/material'
 import { CourseCard } from '../../components/CourseCard'
 
-
 interface Course {
   id: number;
   title: string;
@@ -64,7 +63,6 @@ export default function CoursesPage() {
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }} key={course.id}>
             <CourseCard 
               course={course} 
-              //  onViewDetails={handleViewCourseDetails}
             />
           </Grid>
         ))}

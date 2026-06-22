@@ -1,20 +1,3 @@
-// import { Typography, Container, Box } from '@mui/material'
-
-// export default function HomePage() {
-//   return (
-//     <Container maxWidth="md">
-//       <Box sx={{ mt: 4 }}>
-//         <Typography variant="h3" gutterBottom>
-//           Bem-vindo à Plataforma de Cursos
-//         </Typography>
-//         <Typography variant="body1">
-//           Página inicial
-//         </Typography>
-//       </Box>
-//     </Container>
-//   )
-// }
-
 
 import {
   Box,
@@ -42,7 +25,6 @@ export default function HomePage() {
         backgroundPosition: "center",
       }}
     >
-      {/* Overlay branco */}
       <Box
         sx={{
           position: "absolute",
@@ -50,8 +32,6 @@ export default function HomePage() {
           backgroundColor: "rgba(255,255,255,0.82)",
         }}
       />
-
-      {/* Conteúdo */}
       <Container
         maxWidth="lg"
         sx={{
