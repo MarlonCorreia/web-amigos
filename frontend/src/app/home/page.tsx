@@ -20,7 +20,7 @@ export default function HomePage() {
         overflow: "hidden",
 
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1920&auto=format&fit=crop')",
+          "url('https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=1920&auto=format&fit=crop')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}
