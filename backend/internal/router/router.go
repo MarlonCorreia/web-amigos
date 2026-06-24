@@ -2,6 +2,7 @@ package router
 
 import (
 	"courses/internal/handler"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,8 +14,13 @@ import (
 func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHandler, reviewHandler *handler.ReviewHandler, courseHandler *handler.CourseHandler, moduleHandler *handler.ModuleHandler, lessonHandler *handler.LessonHandler, enrollHandler *handler.EnrollmentHandler, jwtSecret string, allowedOrigins string) *chi.Mux {
 	r := chi.NewRouter()
 
+	origins := strings.Split(allowedOrigins, ",")
+	for i, origin := range origins {
+		origins[i] = strings.TrimSpace(origin)
+	}
+
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{allowedOrigins},
+		AllowedOrigins: origins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
 	}))

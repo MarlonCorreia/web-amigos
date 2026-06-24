@@ -9,7 +9,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 
 interface CourseCardProps {
   course: {
-    id: number;
+    id: number | string;
     title: string;
     category: string;
     price: string;
@@ -18,8 +18,7 @@ interface CourseCardProps {
     students: string;
     author: string;
     image: string;
-}
-    
+  }
 }
 
 

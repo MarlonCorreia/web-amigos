@@ -46,6 +46,9 @@ function UserMenu() {
               {user?.full_name ?? user?.email}
             </Typography>,
             <Divider key="divider" />,
+            <MenuItem key="my-courses" component={Link} to="/my-courses" onClick={close}>
+              Meus Cursos
+            </MenuItem>,
             <MenuItem key="logout" onClick={handleLogout}>
               Sair
             </MenuItem>,

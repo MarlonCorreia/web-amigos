@@ -6,6 +6,7 @@ import LoginPage from './app/login/page'
 import RegisterPage from './app/register/page'
 import PaymentPage from './app/payment/page'
 import CourseDetailsPage from './app/courseDetails/page'
+import MyCoursesPage from './app/my-courses/page'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/payment/:transactionID" element={<PaymentPage />} />
+        <Route path="/my-courses" element={<MyCoursesPage />} />
       </Routes>
     </>
   )
