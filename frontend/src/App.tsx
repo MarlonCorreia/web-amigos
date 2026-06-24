@@ -7,6 +7,7 @@ import RegisterPage from './app/register/page'
 import PaymentPage from './app/payment/page'
 import CourseDetailsPage from './app/courseDetails/page'
 import MyCoursesPage from './app/my-courses/page'
+import ManageCoursesPage from './app/manage-courses/page'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/payment/:transactionID" element={<PaymentPage />} />
         <Route path="/my-courses" element={<MyCoursesPage />} />
+        <Route path="/manage-courses" element={<ManageCoursesPage />} />
       </Routes>
     </>
   )

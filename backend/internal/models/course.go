@@ -26,17 +26,18 @@ type Course struct {
 }
 
 type CreateCourseRequest struct {
-	CreatorID          uuid.UUID `json:"creator" binding:"required,uui"`
-	Title              string    `json:"title" binding:"required"`
-	Description        string    `json:"description" binding:"required"`
-	ThumbnailURL       string    `json:"thumbnail_url" binding:"required"`
-	GatewayProductID   string    `json:"gateway_product_id" binding:"required"`
-	Price              *float64  `json:"price" binding:"required"`
-	AccessDurationDays *int      `json:"access_duration_days" binding:"required,min=1"`
+	CreatorID          uuid.UUID `json:"creator" validate:"required,uuid"`
+	Title              string    `json:"title" validate:"required"`
+	Description        string    `json:"description" validate:"required"`
+	ThumbnailURL       string    `json:"thumbnail_url" validate:"required"`
+	GatewayProductID   string    `json:"gateway_product_id" validate:"required"`
+	Price              *float64  `json:"price" validate:"required"`
+	AccessDurationDays *int      `json:"access_duration_days" validate:"required,min=1"`
 }
 
 type CourseResponse struct {
 	ID                 uuid.UUID `json:"id"`
+	CreatorID          uuid.UUID `json:"creator_id"`
 	Title              string    `json:"title"`
 	Description        string    `json:"description"`
 	ThumbnailURL       string    `json:"thumbnail_url"`
@@ -49,6 +50,7 @@ type CourseResponse struct {
 
 type CourseSimpleResponse struct {
 	ID                 uuid.UUID `json:"id"`
+	CreatorID          uuid.UUID `json:"creator_id"`
 	Title              string    `json:"title"`
 	Description        string    `json:"description"`
 	ThumbnailURL       string    `json:"thumbnail_url"`

@@ -21,7 +21,7 @@ func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: origins,
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowedHeaders: []string{"Authorization", "Content-Type"},
 	}))
 	r.Use(middleware.RequestID)

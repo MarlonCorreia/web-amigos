@@ -37,6 +37,7 @@ func (s *CourseService) GetCourse(ctx context.Context, courseID string) (*models
 
 	response := &models.CourseResponse{
 		ID:                 course.ID,
+		CreatorID:          course.CreatorID,
 		Title:              course.Title,
 		Description:        course.Description,
 		CreatedAt:          course.CreatedAt,
@@ -61,6 +62,7 @@ func (s *CourseService) List(ctx context.Context, IsPublished bool) ([]*models.C
 	for _, c := range courses {
 		coursesReponse = append(coursesReponse, &models.CourseSimpleResponse{
 			ID:                 c.ID,
+			CreatorID:          c.CreatorID,
 			Title:              c.Title,
 			Description:        c.Description,
 			ThumbnailURL:       c.ThumbnailURL,
@@ -93,6 +95,7 @@ func (s *CourseService) Create(ctx context.Context, req *models.CreateCourseRequ
 
 	response := &models.CourseSimpleResponse{
 		ID:                 course.ID,
+		CreatorID:          course.CreatorID,
 		Title:              course.Title,
 		Description:        course.Description,
 		ThumbnailURL:       course.ThumbnailURL,

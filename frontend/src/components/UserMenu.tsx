@@ -49,10 +49,15 @@ function UserMenu() {
             <MenuItem key="my-courses" component={Link} to="/my-courses" onClick={close}>
               Meus Cursos
             </MenuItem>,
+            (user?.role === 'creator' || user?.role === 'admin') && (
+              <MenuItem key="manage-courses" component={Link} to="/manage-courses" onClick={close}>
+                Gerenciar Cursos
+              </MenuItem>
+            ),
             <MenuItem key="logout" onClick={handleLogout}>
               Sair
             </MenuItem>,
-          ]
+          ].filter(Boolean)
         ) : (
           [
             <MenuItem key="login" component={Link} to="/login" onClick={close}>
