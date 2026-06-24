@@ -16,9 +16,13 @@ func UserRoutes(h *handler.UserHandler, enrollHandler *handler.EnrollmentHandler
 		r.Use(customMiddleware.JWTAuth(jwtSecret))
 
 		r.Get("/me", h.Me)
+		r.Put("/me", h.UpdateProfile)
+		r.Delete("/me", h.DeleteMe)
 		r.Get("/me/enrollments", enrollHandler.GetUserEnrollments)
 		r.Get("/", h.FindByEmail)
 		r.Get("/{id}", h.FindByID)
+		r.Put("/{id}/role", h.UpdateRole)
+		r.Delete("/{id}", h.Delete)
 	})
 
 	return r

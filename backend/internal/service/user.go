@@ -82,3 +82,64 @@ func (s *UserService) GetByID(ctx context.Context, id string) (*models.UserRespo
 
 	return response, nil
 }
+
+func (s *UserService) List(ctx context.Context) ([]*models.UserResponse, error) {
+	users, err := s.repo.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var response []*models.UserResponse
+	for _, u := range users {
+		response = append(response, &models.UserResponse{
+			ID:       u.ID,
+			Email:    u.Email,
+			FullName: u.FullName,
+			Role:     u.Role,
+		})
+	}
+	return response, nil
+}
+
+func (s *UserService) UpdateRole(ctx context.Context, userID, newRole string) error {
+	user, err := s.repo.FindByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	user.Role = newRole
+	return s.repo.Update(ctx, user)
+}
+
+func (s *UserService) Delete(ctx context.Context, userID string) error {
+	// Check if creator has active courses to prevent orphaning them
+	hasCourses, err := s.repo.IsCreatorWithCourses(ctx, userID)
+	if err != nil {
+		return err
+	}
+	if hasCourses {
+		return errors.New("não é possível excluir este usuário: este criador possui cursos ativos cadastrados. Exclua ou reatribua seus cursos primeiro")
+	}
+
+	// Safe transactional delete
+	return s.repo.DeleteTransaction(ctx, userID)
+}
+
+func (s *UserService) UpdateProfile(ctx context.Context, userID string, req *models.UpdateProfileRequest) error {
+	user, err := s.repo.FindByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	user.FullName = req.FullName
+
+	if req.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return errors.New("failed to hash password")
+		}
+		user.PasswordHash = string(hashedPassword)
+	}
+
+	return s.repo.Update(ctx, user)
+}

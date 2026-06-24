@@ -49,9 +49,17 @@ function UserMenu() {
             <MenuItem key="my-courses" component={Link} to="/my-courses" onClick={close}>
               Meus Cursos
             </MenuItem>,
+            <MenuItem key="profile" component={Link} to="/profile" onClick={close}>
+              Meu Perfil
+            </MenuItem>,
             (user?.role === 'creator' || user?.role === 'admin') && (
               <MenuItem key="manage-courses" component={Link} to="/manage-courses" onClick={close}>
                 Gerenciar Cursos
+              </MenuItem>
+            ),
+            user?.role === 'admin' && (
+              <MenuItem key="manage-users" component={Link} to="/manage-users" onClick={close}>
+                Gerenciar Usuários
               </MenuItem>
             ),
             <MenuItem key="logout" onClick={handleLogout}>

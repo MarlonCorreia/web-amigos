@@ -26,6 +26,11 @@ type CreateUserRequest struct {
 	Role     string `json:"role" validate:"required,oneof=admin creator student"`
 }
 
+type UpdateProfileRequest struct {
+	FullName string `json:"full_name" validate:"required"`
+	Password string `json:"password" validate:"omitempty,min=6"`
+}
+
 type UserLoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`

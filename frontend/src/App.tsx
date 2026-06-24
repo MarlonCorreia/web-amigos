@@ -8,6 +8,8 @@ import PaymentPage from './app/payment/page'
 import CourseDetailsPage from './app/courseDetails/page'
 import MyCoursesPage from './app/my-courses/page'
 import ManageCoursesPage from './app/manage-courses/page'
+import ManageUsersPage from './app/manage-users/page'
+import ProfilePage from './app/profile/page'
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/payment/:transactionID" element={<PaymentPage />} />
         <Route path="/my-courses" element={<MyCoursesPage />} />
         <Route path="/manage-courses" element={<ManageCoursesPage />} />
+        <Route path="/manage-users" element={<ManageUsersPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
     </>
   )

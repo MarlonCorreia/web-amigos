@@ -63,6 +63,22 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) FindByEmail(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 
+	if email == "" {
+		role := RetrieveUserRole(r.Context())
+		if role != "admin" {
+			http.Error(w, "permission denied: admin role required", http.StatusForbidden)
+			return
+		}
+		users, err := h.s.List(r.Context())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(users)
+		return
+	}
+
 	user, err := h.s.GetByEmail(r.Context(), email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,4 +97,107 @@ func (h *UserHandler) FindByID(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+}
+
+type UpdateRolePayload struct {
+	Role string `json:"role" validate:"required,oneof=student creator admin"`
+}
+
+func (h *UserHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
+	role := RetrieveUserRole(r.Context())
+	if role != "admin" {
+		http.Error(w, "permission denied: admin role required", http.StatusForbidden)
+		return
+	}
+
+	targetID := chi.URLParam(r, "id")
+	currentUserID := RetrieveUserID(r.Context())
+
+	if targetID == currentUserID {
+		http.Error(w, "não é possível alterar seu próprio papel", http.StatusBadRequest)
+		return
+	}
+
+	var payload UpdateRolePayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.v.Struct(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.s.UpdateRole(r.Context(), targetID, payload.Role); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "user role updated successfully"})
+}
+
+func (h *UserHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	// Only admin can delete users
+	role := RetrieveUserRole(r.Context())
+	if role != "admin" {
+		http.Error(w, "permission denied: admin role required", http.StatusForbidden)
+		return
+	}
+
+	targetID := chi.URLParam(r, "id")
+	currentUserID := RetrieveUserID(r.Context())
+
+	if targetID == currentUserID {
+		http.Error(w, "não é possível excluir sua própria conta", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.s.Delete(r.Context(), targetID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "user deleted successfully"})
+}
+
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	userID := RetrieveUserID(r.Context())
+
+	var payload models.UpdateProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.v.Struct(payload); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err := h.s.UpdateProfile(r.Context(), userID, &payload); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "profile updated successfully"})
+}
+
+func (h *UserHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
+	userID := RetrieveUserID(r.Context())
+
+	if err := h.s.Delete(r.Context(), userID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "account deleted successfully"})
 }
