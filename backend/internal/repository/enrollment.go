@@ -16,6 +16,7 @@ type EnrollmentRepository interface {
 	ActivateEnrollmentByTransaction(ctx context.Context, transactionID string, expiresAt time.Time) error
 	GetActiveEnrollmentsByUser(ctx context.Context, userID string) ([]*models.Enrollment, error)
 	HasActiveEnrollment(ctx context.Context, userID, courseID string) (bool, error)
+	GetEnrollmentByTransaction(ctx context.Context, transactionID string) (*models.Enrollment, error)
 }
 
 type enrollmentRepository struct {
@@ -95,4 +96,13 @@ func (r *enrollmentRepository) GetEnrollmentCountByCourse(ctx context.Context, c
 		Where("course_id = ?", courseID).
 		Count(&count).Error
 	return count, err
+}
+
+func (r *enrollmentRepository) GetEnrollmentByTransaction(ctx context.Context, transactionID string) (*models.Enrollment, error) {
+	var enrollment models.Enrollment
+	err := r.db.WithContext(ctx).Where("gateway_transaction_id = ?", transactionID).First(&enrollment).Error
+	if err != nil {
+		return nil, err
+	}
+	return &enrollment, nil
 }

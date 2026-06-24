@@ -39,6 +39,8 @@ func SetupRouter(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	})
 
 	r.Post("/webhooks/gateway", enrollHandler.WebhookGateway)
+	r.Get("/webhooks/gateway", enrollHandler.WebhookGatewayGET)
+	r.Get("/webhooks/gateway/status", enrollHandler.GetStatusByTransaction)
 
 	return r
 }

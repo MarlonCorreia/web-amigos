@@ -81,6 +81,10 @@ func (s *EnrollmentService) ActivateByTransaction(ctx context.Context, transacti
 	return s.enrollRepo.ActivateEnrollmentByTransaction(ctx, transactionID, expiresAt)
 }
 
+func (s *EnrollmentService) GetByTransaction(ctx context.Context, transactionID string) (*models.Enrollment, error) {
+	return s.enrollRepo.GetEnrollmentByTransaction(ctx, transactionID)
+}
+
 func (s *EnrollmentService) GetUserEnrollments(ctx context.Context, userID string) ([]*models.Enrollment, error) {
 	return s.enrollRepo.GetActiveEnrollmentsByUser(ctx, userID)
 }
@@ -90,8 +94,8 @@ func (s *EnrollmentService) HasActiveEnrollment(ctx context.Context, userID, cou
 }
 
 func (s *EnrollmentService) buildEnrollResponse(transactionID, status string) *EnrollResponse {
-	paymentURL := fmt.Sprintf("%s/payment/%s", s.frontendURL, transactionID)
-	qrCodeURL := "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + url.QueryEscape(paymentURL)
+	paymentURL := fmt.Sprintf("http://localhost:8080/webhooks/gateway?transaction_id=%s", transactionID)
+	qrCodeURL := "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + url.QueryEscape(paymentURL)
 	return &EnrollResponse{
 		TransactionID: transactionID,
 		Status:        status,
