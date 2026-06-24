@@ -2,6 +2,11 @@ export interface CourseReview {
   id: string
   course_id: string
   user_id: string
+  user?: {
+    id: string
+    full_name: string
+    email: string
+  }
   rating: number
   comment: string
   created_at: string

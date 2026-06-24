@@ -18,6 +18,8 @@ import {
   Breadcrumbs,
   Link as MuiLink,
   Divider,
+  TextField,
+  Chip,
 } from '@mui/material'
 import {
   MenuBook,
@@ -41,6 +43,7 @@ import {
   getCourseReviews,
   type CourseResponse,
 } from '../../api/courses'
+import { createReview, updateReview, deleteReview } from '../../api/reviews'
 import type { CourseReview } from '../../types/review'
 
 const PRIMARY_COLOR = '#C2410C'
@@ -65,7 +68,7 @@ interface MappedModule {
 export default function CourseDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { isAuthenticated, user, loading: authLoading } = useAuth()
 
   const [course, setCourse] = useState<CourseResponse | null>(null)
   const [modules, setModules] = useState<MappedModule[]>([])
@@ -76,6 +79,13 @@ export default function CourseDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [enrolling, setEnrolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const [userRating, setUserRating] = useState<number>(5)
+  const [userComment, setUserComment] = useState<string>('')
+  const [reviewSubmitting, setReviewSubmitting] = useState<boolean>(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
+  const [isEditingReview, setIsEditingReview] = useState<boolean>(false)
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
 
   useEffect(() => {
     if (authLoading) return
@@ -116,7 +126,7 @@ export default function CourseDetailsPage() {
         if (enrolled) {
           // If enrolled, load private content in one call
           const content = await getCourseContent(id)
-          
+
           const mappedMods: MappedModule[] = (content.Modules || []).map((m: any) => ({
             id: m.ID,
             title: m.Title,
@@ -131,11 +141,11 @@ export default function CourseDetailsPage() {
               isFree: l.IsFree,
             })),
           }))
-          
+
           // Sort modules and lessons by position
           mappedMods.sort((a, b) => a.position - b.position)
           mappedMods.forEach(m => m.lessons.sort((a, b) => a.position - b.position))
-          
+
           setModules(mappedMods)
 
           // Select the first lesson as default playing
@@ -145,7 +155,7 @@ export default function CourseDetailsPage() {
         } else {
           // If not enrolled or logged out, build syllabus from public modules & lessons
           const publicMods = await getCourseModules(id)
-          
+
           const mappedMods: MappedModule[] = await Promise.all(
             publicMods.map(async (mod) => {
               const lessons = await getModuleLessons(mod.id)
@@ -239,12 +249,88 @@ export default function CourseDetailsPage() {
     return isEnrolled || lesson.isFree
   }
 
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!id || !user) return
+
+    setReviewError(null)
+    setReviewSubmitting(true)
+
+    try {
+      if (isEditingReview && editingReviewId) {
+        await updateReview(editingReviewId, {
+          rating: userRating,
+          comment: userComment,
+        })
+
+        setReviews(prev => prev.map(r => r.id === editingReviewId ? {
+          ...r,
+          rating: userRating,
+          comment: userComment,
+          updated_at: new Date().toISOString()
+        } : r))
+
+        setIsEditingReview(false)
+        setEditingReviewId(null)
+      } else {
+        await createReview({
+          course_id: id,
+          rating: userRating,
+          comment: userComment,
+        })
+
+        const courseReviews = await getCourseReviews(id)
+        setReviews(courseReviews)
+
+        setUserComment('')
+        setUserRating(5)
+      }
+    } catch (err) {
+      console.error('Erro ao salvar avaliacao:', err)
+      setReviewError(err instanceof Error ? err.message : 'Erro ao processar sua avaliacao.')
+    } finally {
+      setReviewSubmitting(false)
+    }
+  }
+
+  const handleReviewDelete = async (reviewId: string) => {
+    if (!window.confirm('Tem certeza de que deseja remover sua avaliação?')) {
+      return
+    }
+
+    setReviewError(null)
+    setReviewSubmitting(true)
+
+    try {
+      await deleteReview(reviewId)
+
+      setReviews(prev => prev.filter(r => r.id !== reviewId))
+
+      setUserComment('')
+      setUserRating(5)
+      setIsEditingReview(false)
+      setEditingReviewId(null)
+    } catch (err) {
+      console.error('Erro ao excluir avaliacao:', err)
+      setReviewError('Erro ao excluir sua avaliação.')
+    } finally {
+      setReviewSubmitting(false)
+    }
+  }
+
+  const handleStartEditReview = (review: CourseReview) => {
+    setIsEditingReview(true)
+    setEditingReviewId(review.id)
+    setUserRating(review.rating)
+    setUserComment(review.comment)
+  }
+
   // Count total lessons & duration
   const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0)
   const totalDuration = modules.reduce((sum, m) => sum + m.lessons.reduce((d, l) => d + l.durationMinutes, 0), 0)
 
   // Calculate average rating from reviews
-  const avgRating = reviews.length > 0 
+  const avgRating = reviews.length > 0
     ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1))
     : 5.0
 
@@ -259,6 +345,18 @@ export default function CourseDetailsPage() {
             </MuiLink>
             <Typography color="text.primary">{course.title}</Typography>
           </Breadcrumbs>
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 800, mt: 2, color: '#111827' }}>
+            {course.title}
+          </Typography>
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mt: 1.5 }}>
+            <Rating value={avgRating} readOnly precision={0.1} size="small" />
+            <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+              {avgRating}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              ({reviews.length} avaliações)
+            </Typography>
+          </Stack>
         </Container>
       </Box>
 
@@ -272,7 +370,7 @@ export default function CourseDetailsPage() {
                 <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
                   Aula em Exibição: {activeLesson.title}
                 </Typography>
-                
+
                 {hasAccess(activeLesson) ? (
                   <Box
                     sx={{
@@ -426,7 +524,7 @@ export default function CourseDetailsPage() {
                         </Typography>
                       </Box>
                     </AccordionSummary>
-                    
+
                     <AccordionDetails sx={{ borderTop: '1px solid #e5e7eb', bgcolor: '#f9fafb', p: 0 }}>
                       {mod.lessons.length === 0 ? (
                         <Box sx={{ px: 3, py: 2 }}>
@@ -519,7 +617,7 @@ export default function CourseDetailsPage() {
                 border: '1px solid #e5e7eb',
               }}
             >
-              <Box 
+              <Box
                 component="img"
                 src={course.thumbnail_url || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80'}
                 alt={course.title}
@@ -598,40 +696,169 @@ export default function CourseDetailsPage() {
       {/* REVIEWS SECTION */}
       <Container sx={{ mt: 4 }}>
         <Divider sx={{ my: 6 }} />
-        <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 4, color: '#111827' }}>
-          Avaliações dos Alunos ({reviews.length})
-        </Typography>
 
-        {reviews.length === 0 ? (
-          <Alert severity="info" sx={{ borderRadius: 2 }}>
-            Este curso ainda não possui avaliações. Seja o primeiro a avaliar!
-          </Alert>
-        ) : (
-          <Grid container spacing={3}>
-            {reviews.map((review) => (
-              <Grid size={{ xs: 12, md: 6 }} key={review.id}>
-                <Card variant="outlined" sx={{ borderRadius: 3, height: '100%' }}>
-                  <CardContent sx={{ p: 3 }}>
-                    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#111827' }}>
-                          Aluno Anônimo
+        {/* Avaliação do Usuário Logado & Matriculado (CRUD) */}
+        {isEnrolled && user && (
+          <Box sx={{ mb: 6 }}>
+            {(() => {
+              const myReview = reviews.find((r) => r.user_id === user.id)
+              const showForm = !myReview || isEditingReview
+
+              if (showForm) {
+                return (
+                  <Card variant="outlined" sx={{ borderRadius: 3, p: 3, border: '1px solid #e5e7eb', bgcolor: '#fbfbfb' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                      {isEditingReview ? 'Editar sua Avaliação' : 'Avaliar este Curso'}
+                    </Typography>
+
+                    {reviewError && (
+                      <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                        {reviewError}
+                      </Alert>
+                    )}
+
+                    <Box component="form" onSubmit={handleReviewSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          Sua nota:
                         </Typography>
+                        <Rating
+                          value={userRating}
+                          onChange={(_, val) => setUserRating(val || 5)}
+                          size="large"
+                        />
+                      </Box>
+                      <TextField
+                        label="O que você achou do curso? Deixe seu comentário (opcional)"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={userComment}
+                        onChange={(e) => setUserComment(e.target.value)}
+                        placeholder="Ex: Excelente material, muito prático e direto ao ponto!"
+                      />
+                      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                        {isEditingReview && (
+                          <Button
+                            variant="outlined"
+                            onClick={() => {
+                              setIsEditingReview(false)
+                              setEditingReviewId(null)
+                              setUserComment('')
+                              setUserRating(5)
+                            }}
+                            disabled={reviewSubmitting}
+                          >
+                            Cancelar
+                          </Button>
+                        )}
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          disabled={reviewSubmitting}
+                        >
+                          {reviewSubmitting ? 'Enviando...' : 'Enviar Avaliação'}
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Card>
+                )
+              } else {
+                return (
+                  <Card variant="outlined" sx={{ borderRadius: 3, p: 3, border: '1px solid #fed7aa', bgcolor: '#fff7ed' }}>
+                    <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                      <Box>
+                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#c2410c' }}>
+                            Sua Avaliação
+                          </Typography>
+                          <Chip label="Você" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                        </Stack>
                         <Typography variant="caption" color="text.secondary">
-                          {new Date(review.created_at).toLocaleDateString('pt-BR')}
+                          Publicado em {new Date(myReview.created_at).toLocaleDateString('pt-BR')}
+                          {myReview.updated_at !== myReview.created_at && ' (editado)'}
                         </Typography>
                       </Box>
-                      <Rating value={review.rating} readOnly size="small" />
+                      <Rating value={myReview.rating} readOnly size="small" />
                     </Stack>
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.6 }}>
-                      "{review.comment}"
+                    <Typography variant="body2" sx={{ fontStyle: 'italic', mb: 3, color: 'text.primary', lineHeight: 1.6 }}>
+                      "{myReview.comment}"
                     </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => handleStartEditReview(myReview)}
+                        disabled={reviewSubmitting}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        onClick={() => handleReviewDelete(myReview.id)}
+                        disabled={reviewSubmitting}
+                      >
+                        Excluir
+                      </Button>
+                    </Box>
+                  </Card>
+                )
+              }
+            })()}
+          </Box>
         )}
+
+        {/* Lista de Outras Avaliações */}
+        {(() => {
+          const myReview = user ? reviews.find((r) => r.user_id === user.id) : null
+          const listReviews = myReview ? reviews.filter((r) => r.user_id !== user.id) : reviews
+          const title = myReview ? `Outras Avaliações (${listReviews.length})` : `Avaliações dos Alunos (${reviews.length})`
+
+          return (
+            <>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 4, color: '#111827' }}>
+                {title}
+              </Typography>
+
+              {listReviews.length === 0 ? (
+                <Alert severity="info" sx={{ borderRadius: 2 }}>
+                  {myReview
+                    ? "Nenhum outro aluno avaliou este curso ainda."
+                    : "Este curso ainda não possui avaliações. Seja o primeiro a avaliar!"}
+                </Alert>
+              ) : (
+                <Grid container spacing={3}>
+                  {listReviews.map((review) => (
+                    <Grid size={{ xs: 12, md: 6 }} key={review.id}>
+                      <Card variant="outlined" sx={{ borderRadius: 3, height: '100%', border: '1px solid #e5e7eb' }}>
+                        <CardContent sx={{ p: 3 }}>
+                          <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                            <Box>
+                              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: '#111827' }}>
+                                {review.user?.full_name ?? 'Aluno Anônimo'}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {new Date(review.created_at).toLocaleDateString('pt-BR')}
+                              </Typography>
+                            </Box>
+                            <Rating value={review.rating} readOnly size="small" />
+                          </Stack>
+                          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.6 }}>
+                            "{review.comment}"
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </>
+          )
+        })()}
       </Container>
     </Box>
   )

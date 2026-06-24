@@ -17,5 +17,6 @@ export async function apiRequest<T>(path: string, options?: RequestInit): Promis
     throw new Error(message || `Erro ${res.status}`)
   }
 
-  return res.json()
+  const text = await res.text()
+  return text ? JSON.parse(text) : ({} as T)
 }
