@@ -221,7 +221,7 @@ export default function CourseDetailsPage() {
   }, [id, isAuthenticated, authLoading])
 
   useEffect(() => {
-    if (!activeLesson || (!isEnrolled && !activeLesson.isFree)) return
+    if (!activeLesson || (!isEnrolled && !activeLesson.isFree && user?.role !== 'admin' && user?.role !== 'creator')) return
     setComments([])
     setCommentError(null)
     getComments(activeLesson.id)
@@ -273,7 +273,7 @@ export default function CourseDetailsPage() {
   }
 
   const hasAccess = (lesson: MappedLesson) => {
-    return isEnrolled || lesson.isFree
+    return isEnrolled || lesson.isFree || user?.role === 'admin' || user?.role === 'creator'
   }
 
   const handleReviewSubmit = async (e: React.FormEvent) => {

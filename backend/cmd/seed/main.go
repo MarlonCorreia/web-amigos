@@ -89,7 +89,7 @@ func main() {
 		GatewayProductID:   "prod_go_zero",
 	}
 	course2 := models.Course{
-		CreatorID:          creator.ID,
+		CreatorID:          creator2.ID,
 		Title:              "React com Next.js",
 		Description:        "Construa aplicações modernas com React e Next.js.",
 		Price:              149.90,
@@ -99,7 +99,7 @@ func main() {
 		GatewayProductID:   "prod_react_next",
 	}
 	course3 := models.Course{
-		CreatorID:          creator2.ID,
+		CreatorID:          creator.ID,
 		Title:              "Concorrência em Go",
 		Description:        "Domine goroutines, channels e sincronização em Go.",
 		Price:              149.90,
@@ -229,10 +229,12 @@ func main() {
 	// -------------------------------------------------------------------------
 
 	// Existing: student → course1 (active)
+	expiresAt := time.Now().AddDate(1, 0, 0) // 1 year from now
 	enrollment := models.Enrollment{
-		UserID:   student.ID,
-		CourseID: course1.ID,
-		Status:   "active",
+		UserID:    student.ID,
+		CourseID:  course1.ID,
+		Status:    "active",
+		ExpiresAt: &expiresAt,
 	}
 	if err := db.Where(models.Enrollment{UserID: student.ID, CourseID: course1.ID}).FirstOrCreate(&enrollment).Error; err != nil {
 		log.Fatalf("erro ao criar matrícula: %v", err)

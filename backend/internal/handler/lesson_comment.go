@@ -21,7 +21,12 @@ func (h *LessonCommentHandler) List(w http.ResponseWriter, r *http.Request) {
 	lessonID := chi.URLParam(r, "lessonID")
 	comments, err := h.s.ListComments(r.Context(), lessonID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		msg := err.Error()
+		if msg == "access denied" || msg == "forbidden" {
+			status = http.StatusForbidden
+		}
+		http.Error(w, msg, status)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -40,7 +45,12 @@ func (h *LessonCommentHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	lessonID := chi.URLParam(r, "lessonID")
 	if err := h.s.CreateComment(r.Context(), lessonID, &req); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		msg := err.Error()
+		if msg == "access denied" || msg == "forbidden" {
+			status = http.StatusForbidden
+		}
+		http.Error(w, msg, status)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -49,7 +59,12 @@ func (h *LessonCommentHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *LessonCommentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	commentID := chi.URLParam(r, "commentID")
 	if err := h.s.DeleteComment(r.Context(), commentID); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		status := http.StatusInternalServerError
+		msg := err.Error()
+		if msg == "access denied" || msg == "forbidden" {
+			status = http.StatusForbidden
+		}
+		http.Error(w, msg, status)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
