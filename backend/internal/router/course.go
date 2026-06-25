@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func CourseRoutes(h *handler.CourseHandler, moduleHandler *handler.ModuleHandler, lessonHandler *handler.LessonHandler, enrollHandler *handler.EnrollmentHandler, jwtSecret string) *chi.Mux {
+func CourseRoutes(h *handler.CourseHandler, moduleHandler *handler.ModuleHandler, lessonHandler *handler.LessonHandler, enrollHandler *handler.EnrollmentHandler, commentHandler *handler.LessonCommentHandler, jwtSecret string) *chi.Mux {
 	r := chi.NewRouter()
 
 	// Public routes
@@ -37,12 +37,15 @@ func CourseRoutes(h *handler.CourseHandler, moduleHandler *handler.ModuleHandler
 			r.Route("/lessons", func(r chi.Router) {
 				r.Put("/{lessonID}", lessonHandler.UpdateLessonHandler)
 				r.Delete("/{lessonID}", lessonHandler.DeleteLessonHandler)
+				r.Mount("/{lessonID}/comments", LessonCommentRoutes(commentHandler))
 			})
 		})
 
 		r.Post("/{courseID}/enroll", enrollHandler.Enroll)
 		r.Get("/{courseID}/enroll", enrollHandler.GetEnrollmentStatus)
 		r.Get("/{courseID}/content", h.GetCourseContent)
+
+		r.Delete("/comments/{commentID}", commentHandler.Delete)
 	})
 
 	return r

@@ -27,6 +27,7 @@ func InitDB(dsn string) (*gorm.DB, error) {
 		&models.Lesson{},
 		&models.Enrollment{},
 		&models.CourseReview{},
+		&models.LessonComment{},
 	)
 	if err != nil {
 		return nil, err
