@@ -221,7 +221,7 @@ export default function CourseDetailsPage() {
   }, [id, isAuthenticated, authLoading])
 
   useEffect(() => {
-    if (!activeLesson || !isEnrolled) return
+    if (!activeLesson || (!isEnrolled && !activeLesson.isFree)) return
     setComments([])
     setCommentError(null)
     getComments(activeLesson.id)
