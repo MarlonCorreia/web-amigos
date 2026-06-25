@@ -126,14 +126,18 @@ func main() {
 	}
 
 	// Update ThumbnailURL and GatewayProductID for existing courses (idempotent)
-	db.Model(&course1).Updates(models.Course{
+	if err := db.Model(&course1).Updates(models.Course{
 		ThumbnailURL:     "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800",
 		GatewayProductID: "prod_go_zero",
-	})
-	db.Model(&course2).Updates(models.Course{
+	}).Error; err != nil {
+		log.Printf("warn: failed to update course1: %v", err)
+	}
+	if err := db.Model(&course2).Updates(models.Course{
 		ThumbnailURL:     "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800",
 		GatewayProductID: "prod_react_next",
-	})
+	}).Error; err != nil {
+		log.Printf("warn: failed to update course2: %v", err)
+	}
 
 	// -------------------------------------------------------------------------
 	// Módulos
@@ -150,7 +154,7 @@ func main() {
 	}
 
 	for i := range modules {
-		if err := db.Where(models.Module{CourseID: modules[i].CourseID, Position: modules[i].Position}).FirstOrCreate(&modules[i]).Error; err != nil {
+		if err := db.Where(models.Module{CourseID: modules[i].CourseID, Title: modules[i].Title}).FirstOrCreate(&modules[i]).Error; err != nil {
 			log.Fatalf("erro ao criar módulo: %v", err)
 		}
 	}
@@ -192,25 +196,33 @@ func main() {
 	}
 
 	for i := range lessons {
-		if err := db.Where(models.Lesson{ModuleID: lessons[i].ModuleID, Position: lessons[i].Position}).FirstOrCreate(&lessons[i]).Error; err != nil {
+		if err := db.Where(models.Lesson{ModuleID: lessons[i].ModuleID, Title: lessons[i].Title}).FirstOrCreate(&lessons[i]).Error; err != nil {
 			log.Fatalf("erro ao criar aula: %v", err)
 		}
 	}
 
 	// Update YoutubeID and DurationMinutes on existing lessons
 	// course1 / Fundamentos do Go: pos 2 = "Tipos e variáveis" → "Variáveis e Tipos" brief mapping
-	db.Model(&lessons[1]).Updates(models.Lesson{YoutubeID: "MzKEFWNDmtI", DurationMinutes: 15})
+	if err := db.Model(&lessons[1]).Updates(models.Lesson{YoutubeID: "MzKEFWNDmtI", DurationMinutes: 15}).Error; err != nil {
+		log.Printf("warn: failed to update lesson[1]: %v", err)
+	}
 	// course1 / Concorrência: pos 1 = "Goroutines"
-	db.Model(&lessons[2]).Updates(models.Lesson{YoutubeID: "f6kdp27TYZs", DurationMinutes: 18})
+	if err := db.Model(&lessons[2]).Updates(models.Lesson{YoutubeID: "f6kdp27TYZs", DurationMinutes: 18}).Error; err != nil {
+		log.Printf("warn: failed to update lesson[2]: %v", err)
+	}
 	// course2 / Fundamentos do React: pos 1 = "Componentes e Props"
 	isFreeTrue := true
-	db.Model(&lessons[3]).Updates(map[string]interface{}{
+	if err := db.Model(&lessons[3]).Updates(map[string]interface{}{
 		"youtube_id":       "Ke90Tje7VS0",
 		"duration_minutes": 22,
 		"is_free":          isFreeTrue,
-	})
+	}).Error; err != nil {
+		log.Printf("warn: failed to update lesson[3]: %v", err)
+	}
 	// course2 / Server Components: pos 1 = "use server e use client" → brief maps "useState e useEffect"
-	db.Model(&lessons[4]).Updates(models.Lesson{YoutubeID: "O6P86uwfdR0", DurationMinutes: 28})
+	if err := db.Model(&lessons[4]).Updates(models.Lesson{YoutubeID: "O6P86uwfdR0", DurationMinutes: 28}).Error; err != nil {
+		log.Printf("warn: failed to update lesson[4]: %v", err)
+	}
 
 	// -------------------------------------------------------------------------
 	// Matrículas
