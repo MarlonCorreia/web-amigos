@@ -20,6 +20,10 @@ import {
   Divider,
   TextField,
   Chip,
+  Tabs,
+  Tab,
+  IconButton,
+  Tooltip,
 } from '@mui/material'
 import {
   MenuBook,
@@ -30,6 +34,8 @@ import {
   LockOutlined,
   ArrowBack,
   CheckCircle,
+  Delete,
+  QuestionAnswer,
 } from '@mui/icons-material'
 
 import { useAuth } from '../../contexts/AuthContext'
@@ -45,6 +51,8 @@ import {
 } from '../../api/courses'
 import { createReview, updateReview, deleteReview } from '../../api/reviews'
 import type { CourseReview } from '../../types/review'
+import { getComments, createComment, deleteComment } from '../../api/comments'
+import type { LessonComment } from '../../types/comment'
 
 const PRIMARY_COLOR = '#C2410C'
 
@@ -86,6 +94,12 @@ export default function CourseDetailsPage() {
   const [reviewError, setReviewError] = useState<string | null>(null)
   const [isEditingReview, setIsEditingReview] = useState<boolean>(false)
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null)
+
+  const [comments, setComments] = useState<LessonComment[]>([])
+  const [newComment, setNewComment] = useState('')
+  const [commentSubmitting, setCommentSubmitting] = useState(false)
+  const [commentError, setCommentError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState(0)
 
   useEffect(() => {
     if (authLoading) return
@@ -206,6 +220,19 @@ export default function CourseDetailsPage() {
     loadData()
   }, [id, isAuthenticated, authLoading])
 
+  useEffect(() => {
+    if (!activeLesson || !isEnrolled) return
+    setComments([])
+    setCommentError(null)
+    getComments(activeLesson.id)
+      .then(setComments)
+      .catch(() => setComments([]))
+  }, [activeLesson, isEnrolled])
+
+  useEffect(() => {
+    setActiveTab(0)
+  }, [activeLesson?.id])
+
   async function handleEnroll() {
     if (!isAuthenticated) {
       navigate('/login')
@@ -323,6 +350,32 @@ export default function CourseDetailsPage() {
     setEditingReviewId(review.id)
     setUserRating(review.rating)
     setUserComment(review.comment)
+  }
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!activeLesson || !newComment.trim()) return
+    setCommentSubmitting(true)
+    setCommentError(null)
+    try {
+      await createComment(activeLesson.id, newComment.trim())
+      setNewComment('')
+      const fresh = await getComments(activeLesson.id)
+      setComments(fresh)
+    } catch (err) {
+      setCommentError(err instanceof Error ? err.message : 'Erro ao enviar comentário')
+    } finally {
+      setCommentSubmitting(false)
+    }
+  }
+
+  const handleDeleteComment = async (commentID: string) => {
+    try {
+      await deleteComment(commentID)
+      setComments(prev => prev.filter(c => c.id !== commentID))
+    } catch (err) {
+      setCommentError(err instanceof Error ? err.message : 'Erro ao deletar comentário')
+    }
   }
 
   // Count total lessons & duration
@@ -467,7 +520,112 @@ export default function CourseDetailsPage() {
                   </Box>
                 )}
 
-                {activeLesson.description && (
+                {hasAccess(activeLesson) && (
+                  <Box sx={{ mt: 3 }}>
+                    <Tabs
+                      value={activeTab}
+                      onChange={(_e, v) => setActiveTab(v)}
+                      sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+                    >
+                      <Tab label="Descrição" />
+                      <Tab label={`Dúvidas (${comments.length})`} icon={<QuestionAnswer sx={{ fontSize: 16 }} />} iconPosition="end" />
+                    </Tabs>
+
+                    {/* Tab 0: Descrição */}
+                    {activeTab === 0 && (
+                      <Box>
+                        {activeLesson.description ? (
+                          <Typography variant="body2" color="text.secondary">
+                            {activeLesson.description}
+                          </Typography>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            Nenhuma descrição disponível para esta aula.
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
+
+                    {/* Tab 1: Dúvidas */}
+                    {activeTab === 1 && (
+                      <Box>
+                        {commentError && (
+                          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setCommentError(null)}>
+                            {commentError}
+                          </Alert>
+                        )}
+
+                        {/* Formulário novo comentário */}
+                        <Box component="form" onSubmit={handleCommentSubmit} sx={{ mb: 3 }}>
+                          <TextField
+                            fullWidth
+                            multiline
+                            minRows={2}
+                            placeholder="Pergunte ou comente algo sobre esta aula..."
+                            value={newComment}
+                            onChange={e => setNewComment(e.target.value)}
+                            size="small"
+                            sx={{ mb: 1 }}
+                          />
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            size="small"
+                            disabled={commentSubmitting || !newComment.trim()}
+                            sx={{ bgcolor: PRIMARY_COLOR }}
+                          >
+                            {commentSubmitting ? 'Enviando...' : 'Enviar'}
+                          </Button>
+                        </Box>
+
+                        {/* Lista de comentários */}
+                        {comments.length === 0 ? (
+                          <Alert severity="info">Nenhum comentário ainda. Seja o primeiro a perguntar!</Alert>
+                        ) : (
+                          <Stack spacing={2}>
+                            {comments.map(comment => (
+                              <Card key={comment.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                                <CardContent sx={{ pb: '12px !important' }}>
+                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                          {comment.user?.full_name ?? 'Usuário'}
+                                        </Typography>
+                                      </Box>
+                                      <Typography variant="caption" color="text.secondary">
+                                        {new Date(comment.created_at).toLocaleDateString('pt-BR', {
+                                          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                        })}
+                                      </Typography>
+                                    </Box>
+                                    {(comment.user_id === user?.id || user?.role === 'admin' || user?.role === 'creator') && (
+                                      <Tooltip title="Deletar comentário">
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => handleDeleteComment(comment.id)}
+                                          sx={{ color: 'text.secondary' }}
+                                        >
+                                          <Delete fontSize="small" />
+                                        </IconButton>
+                                      </Tooltip>
+                                    )}
+                                  </Box>
+                                  <Typography variant="body2" sx={{ mt: 1 }}>
+                                    {comment.content}
+                                  </Typography>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </Stack>
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+
+                {/* Se não tem acesso, mostrar descrição simples como antes */}
+                {!hasAccess(activeLesson) && activeLesson.description && (
                   <Card variant="outlined" sx={{ mt: 3, borderRadius: 2 }}>
                     <CardContent>
                       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
