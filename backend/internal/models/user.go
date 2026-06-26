@@ -7,16 +7,16 @@ import (
 )
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Email        string    `gorm:"type:varchar(255);uniqueIndex;not null"`
-	PasswordHash string    `gorm:"type:varchar(255);not null"`
-	FullName     string    `gorm:"type:varchar(255);not null"`
-	Role         string    `gorm:"type:varchar(50);not null"` // Ex: admin, creator, student
-	CreatedAt    time.Time `gorm:"autoCreateTime"`
+	ID           uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+	Email        string    `gorm:"type:varchar(255);uniqueIndex;not null" json:"email"`
+	PasswordHash string    `gorm:"type:varchar(255);not null" json:"-"`
+	FullName     string    `gorm:"type:varchar(255);not null" json:"full_name"`
+	Role         string    `gorm:"type:varchar(50);not null" json:"role"` // Ex: admin, creator, student
+	CreatedAt    time.Time `gorm:"autoCreateTime" json:"created_at"`
 
-	Courses     []Course       `gorm:"foreignKey:CreatorID"`
-	Enrollments []Enrollment   `gorm:"foreignKey:UserID"`
-	Reviews     []CourseReview `gorm:"foreignKey:UserID"`
+	Courses     []Course       `gorm:"foreignKey:CreatorID" json:"courses,omitempty"`
+	Enrollments []Enrollment   `gorm:"foreignKey:UserID" json:"enrollments,omitempty"`
+	Reviews     []CourseReview `gorm:"foreignKey:UserID" json:"reviews,omitempty"`
 }
 
 type CreateUserRequest struct {

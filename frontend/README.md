@@ -1,73 +1,104 @@
-# React + TypeScript + Vite
+# Frontend — SPA em React/TypeScript
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface da plataforma de cursos, desenvolvida como Single Page Application.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Tecnologia | Versão | Uso |
+| :--- | :--- | :--- |
+| React | 18 | Biblioteca de UI |
+| TypeScript | — | Tipagem estática |
+| Vite | — | Bundler e servidor de desenvolvimento |
+| React Router DOM | v7 | Roteamento client-side |
+| Material UI (MUI) | v9 | Componentes de UI |
+| Tema customizado | — | Cor primária `#C2410C` (laranja) |
 
-## React Compiler
+## Arquitetura de Pastas
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+frontend/src/
+├── api/           # Funções de chamada à API (apiRequest)
+│   ├── client.ts  # Base: fetch + auth header + error handling
+│   ├── auth.ts
+│   ├── courses.ts
+│   ├── users.ts
+│   ├── reviews.ts
+│   └── comments.ts
+├── app/           # Páginas (file-based routing manual via App.tsx)
+│   ├── home/
+│   ├── login/
+│   ├── register/
+│   ├── courses/
+│   ├── courseDetails/
+│   ├── create-course/
+│   ├── manage-courses/
+│   ├── manage-users/
+│   ├── my-courses/
+│   ├── payment/
+│   └── profile/
+├── components/    # Componentes reutilizáveis (Navbar, CourseCard, etc.)
+├── contexts/      # AuthContext (estado global de autenticação)
+├── hooks/         # useAuth (acessa AuthContext)
+├── types/         # Interfaces TypeScript (course, user, review, enrollment, comment)
+├── App.tsx        # Configuração de rotas
+├── main.tsx       # Ponto de entrada
+└── theme.ts       # Tema MUI customizado
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Fluxo de Autenticação
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Usuário faz login → backend retorna JWT + dados do usuário
+2. Token salvo em `localStorage['token']`, dados em `localStorage['user']`
+3. `AuthContext` inicializa lendo o localStorage e valida o token via `GET /users/me`
+4. `useAuth()` disponibiliza `{ user, isAuthenticated, loading, login, logout }` em qualquer componente
+5. `apiRequest()` em `api/client.ts` injeta automaticamente `Authorization: Bearer <token>` em todas as chamadas
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Principais Páginas
+
+| Página | Rota | Acesso | Descrição |
+|--------|------|--------|-----------|
+| Home | / | público | Landing page |
+| Login | /login | público | Autenticação |
+| Cadastro | /register | público | Criar conta |
+| Cursos | /courses | público | Catálogo de cursos |
+| Detalhes do Curso | /courses/:id | público/aluno | Player, módulos, avaliações, fórum Q&A |
+| Meus Cursos | /my-courses | aluno | Cursos comprados |
+| Criar Curso | /create-course | creator/admin | Formulário de criação |
+| Gerenciar Cursos | /manage-courses | creator/admin | CRUD de cursos |
+| Gerenciar Usuários | /manage-users | admin | Gestão de roles |
+| Perfil | /profile | autenticado | Editar dados pessoais |
+| Pagamento | /payment | autenticado | Fluxo de checkout |
+
+## Padrão de Chamadas API
+
+Todas as chamadas usam `apiRequest` de `api/client.ts`:
+
+```ts
+import { apiRequest } from './client'
+
+// GET
+const data = await apiRequest<MyType>('/endpoint')
+
+// POST/PUT/DELETE
+await apiRequest<void>('/endpoint', {
+  method: 'POST',
+  body: JSON.stringify(payload),
+})
+```
+
+## Como Rodar em Desenvolvimento
+
+```bash
+cd frontend
+npm install
+npm run dev   # porta 3000
+```
+
+A aplicação ficará disponível em `http://localhost:3000`.
+
+## Build de Produção
+
+```bash
+cd frontend
+npm run build
 ```
