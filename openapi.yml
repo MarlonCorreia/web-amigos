@@ -98,6 +98,18 @@ components:
         user_id:
           type: string
           format: uuid
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+            full_name:
+              type: string
+            role:
+              type: string
         rating:
           type: integer
         comment:

@@ -221,13 +221,18 @@ export default function CourseDetailsPage() {
   }, [id, isAuthenticated, authLoading])
 
   useEffect(() => {
-    if (!activeLesson || (!isEnrolled && !activeLesson.isFree && user?.role !== 'admin' && user?.role !== 'creator')) return
+    if (!activeLesson) return
+    const hasDoubtAccess = isEnrolled || user?.role === 'admin' || user?.role === 'creator'
+    if (!hasDoubtAccess) {
+      setComments([])
+      return
+    }
     setComments([])
     setCommentError(null)
     getComments(activeLesson.id)
       .then(setComments)
       .catch(() => setComments([]))
-  }, [activeLesson, isEnrolled])
+  }, [activeLesson, isEnrolled, user])
 
   useEffect(() => {
     setActiveTab(0)
@@ -522,17 +527,109 @@ export default function CourseDetailsPage() {
 
                 {hasAccess(activeLesson) && (
                   <Box sx={{ mt: 3 }}>
-                    <Tabs
-                      value={activeTab}
-                      onChange={(_e, v) => setActiveTab(v)}
-                      sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
-                    >
-                      <Tab label="Descrição" />
-                      <Tab label={`Dúvidas (${comments.length})`} icon={<QuestionAnswer sx={{ fontSize: 16 }} />} iconPosition="end" />
-                    </Tabs>
+                    {(isEnrolled || user?.role === 'admin' || user?.role === 'creator') ? (
+                      <>
+                        <Tabs
+                          value={activeTab}
+                          onChange={(_e, v) => setActiveTab(v)}
+                          sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+                        >
+                          <Tab label="Descrição" />
+                          <Tab label={`Dúvidas (${comments.length})`} icon={<QuestionAnswer sx={{ fontSize: 16 }} />} iconPosition="end" />
+                        </Tabs>
 
-                    {/* Tab 0: Descrição */}
-                    {activeTab === 0 && (
+                        {/* Tab 0: Descrição */}
+                        {activeTab === 0 && (
+                          <Box>
+                            {activeLesson.description ? (
+                              <Typography variant="body2" color="text.secondary">
+                                {activeLesson.description}
+                              </Typography>
+                            ) : (
+                              <Typography variant="body2" color="text.secondary">
+                                Nenhuma descrição disponível para esta aula.
+                              </Typography>
+                            )}
+                          </Box>
+                        )}
+
+                        {/* Tab 1: Dúvidas */}
+                        {activeTab === 1 && (
+                          <Box>
+                            {commentError && (
+                              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setCommentError(null)}>
+                                {commentError}
+                              </Alert>
+                            )}
+
+                            {/* Formulário novo comentário */}
+                            <Box component="form" onSubmit={handleCommentSubmit} sx={{ mb: 3 }}>
+                              <TextField
+                                fullWidth
+                                multiline
+                                minRows={2}
+                                placeholder="Pergunte ou comente algo sobre esta aula..."
+                                value={newComment}
+                                onChange={e => setNewComment(e.target.value)}
+                                size="small"
+                                sx={{ mb: 1 }}
+                              />
+                              <Button
+                                type="submit"
+                                variant="contained"
+                                size="small"
+                                disabled={commentSubmitting || !newComment.trim()}
+                                sx={{ bgcolor: PRIMARY_COLOR }}
+                              >
+                                {commentSubmitting ? 'Enviando...' : 'Enviar'}
+                              </Button>
+                            </Box>
+
+                            {/* Lista de comentários */}
+                            {comments.length === 0 ? (
+                              <Alert severity="info">Nenhum comentário ainda. Seja o primeiro a perguntar!</Alert>
+                            ) : (
+                              <Stack spacing={2}>
+                                {comments.map(comment => (
+                                  <Card key={comment.id} variant="outlined" sx={{ borderRadius: 2 }}>
+                                    <CardContent sx={{ pb: '12px !important' }}>
+                                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <Box>
+                                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                                              {comment.user?.full_name ?? 'Usuário'}
+                                            </Typography>
+                                          </Box>
+                                          <Typography variant="caption" color="text.secondary">
+                                            {new Date(comment.created_at).toLocaleDateString('pt-BR', {
+                                              day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                            })}
+                                          </Typography>
+                                        </Box>
+                                        {(comment.user_id === user?.id || user?.role === 'admin' || user?.role === 'creator') && (
+                                          <Tooltip title="Deletar comentário">
+                                            <IconButton
+                                              size="small"
+                                              onClick={() => handleDeleteComment(comment.id)}
+                                              sx={{ color: 'text.secondary' }}
+                                            >
+                                              <Delete fontSize="small" />
+                                            </IconButton>
+                                          </Tooltip>
+                                        )}
+                                      </Box>
+                                      <Typography variant="body2" sx={{ mt: 1 }}>
+                                        {comment.content}
+                                      </Typography>
+                                    </CardContent>
+                                  </Card>
+                                ))}
+                              </Stack>
+                            )}
+                          </Box>
+                        )}
+                      </>
+                    ) : (
                       <Box>
                         {activeLesson.description ? (
                           <Typography variant="body2" color="text.secondary">
@@ -542,82 +639,6 @@ export default function CourseDetailsPage() {
                           <Typography variant="body2" color="text.secondary">
                             Nenhuma descrição disponível para esta aula.
                           </Typography>
-                        )}
-                      </Box>
-                    )}
-
-                    {/* Tab 1: Dúvidas */}
-                    {activeTab === 1 && (
-                      <Box>
-                        {commentError && (
-                          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setCommentError(null)}>
-                            {commentError}
-                          </Alert>
-                        )}
-
-                        {/* Formulário novo comentário */}
-                        <Box component="form" onSubmit={handleCommentSubmit} sx={{ mb: 3 }}>
-                          <TextField
-                            fullWidth
-                            multiline
-                            minRows={2}
-                            placeholder="Pergunte ou comente algo sobre esta aula..."
-                            value={newComment}
-                            onChange={e => setNewComment(e.target.value)}
-                            size="small"
-                            sx={{ mb: 1 }}
-                          />
-                          <Button
-                            type="submit"
-                            variant="contained"
-                            size="small"
-                            disabled={commentSubmitting || !newComment.trim()}
-                            sx={{ bgcolor: PRIMARY_COLOR }}
-                          >
-                            {commentSubmitting ? 'Enviando...' : 'Enviar'}
-                          </Button>
-                        </Box>
-
-                        {/* Lista de comentários */}
-                        {comments.length === 0 ? (
-                          <Alert severity="info">Nenhum comentário ainda. Seja o primeiro a perguntar!</Alert>
-                        ) : (
-                          <Stack spacing={2}>
-                            {comments.map(comment => (
-                              <Card key={comment.id} variant="outlined" sx={{ borderRadius: 2 }}>
-                                <CardContent sx={{ pb: '12px !important' }}>
-                                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                    <Box>
-                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
-                                          {comment.user?.full_name ?? 'Usuário'}
-                                        </Typography>
-                                      </Box>
-                                      <Typography variant="caption" color="text.secondary">
-                                        {new Date(comment.created_at).toLocaleDateString('pt-BR', {
-                                          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                                        })}
-                                      </Typography>
-                                    </Box>
-                                    {(comment.user_id === user?.id || user?.role === 'admin' || user?.role === 'creator') && (
-                                      <Tooltip title="Deletar comentário">
-                                        <IconButton
-                                          size="small"
-                                          onClick={() => handleDeleteComment(comment.id)}
-                                          sx={{ color: 'text.secondary' }}
-                                        >
-                                          <Delete fontSize="small" />
-                                        </IconButton>
-                                      </Tooltip>
-                                    )}
-                                  </Box>
-                                  <Typography variant="body2" sx={{ mt: 1 }}>
-                                    {comment.content}
-                                  </Typography>
-                                </CardContent>
-                              </Card>
-                            ))}
-                          </Stack>
                         )}
                       </Box>
                     )}
