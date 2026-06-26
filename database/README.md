@@ -92,7 +92,7 @@ postgres://user:pass@host:5432/dbname?sslmode=disable
 | comment | TEXT | | Comentário |
 | created_at / updated_at | TIMESTAMP | auto | Timestamps |
 
-### `lesson_comments` *(novo neste sprint)*
+### `lesson_comments` 
 
 | Coluna | Tipo | Constraint | Descrição |
 |--------|------|-----------|-----------|
