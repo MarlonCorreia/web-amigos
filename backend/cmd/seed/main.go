@@ -174,7 +174,7 @@ func main() {
 	// -------------------------------------------------------------------------
 	lessons := []models.Lesson{
 		// course1 / Fundamentos do Go
-		{ModuleID: modFundGo.ID, CourseID: course1.ID, Title: "Instalação e configuração", Position: 1, DurationMinutes: 10, IsFree: true},
+		{ModuleID: modFundGo.ID, CourseID: course1.ID, Title: "Instalação e configuração", Position: 1, YoutubeID: "un6ZyFkqFKo", DurationMinutes: 10, IsFree: true},
 		{ModuleID: modFundGo.ID, CourseID: course1.ID, Title: "Tipos e variáveis", Position: 2, DurationMinutes: 20},
 		// course1 / Concorrência
 		{ModuleID: modConcGo.ID, CourseID: course1.ID, Title: "Goroutines", Position: 1, DurationMinutes: 30},
@@ -202,6 +202,10 @@ func main() {
 	}
 
 	// Update YoutubeID and DurationMinutes on existing lessons
+	// course1 / Fundamentos do Go: pos 1 = "Instalação e configuração"
+	if err := db.Model(&lessons[0]).Updates(models.Lesson{YoutubeID: "un6ZyFkqFKo", DurationMinutes: 10}).Error; err != nil {
+		log.Printf("warn: failed to update lesson[0]: %v", err)
+	}
 	// course1 / Fundamentos do Go: pos 2 = "Tipos e variáveis" → "Variáveis e Tipos" brief mapping
 	if err := db.Model(&lessons[1]).Updates(models.Lesson{YoutubeID: "MzKEFWNDmtI", DurationMinutes: 15}).Error; err != nil {
 		log.Printf("warn: failed to update lesson[1]: %v", err)

@@ -46,6 +46,15 @@ func (s *ReviewService) CreateReview(ctx context.Context, payload *models.Course
 		return errors.New("user is not enrolled in this course")
 	}
 
+	existingReviews, err := s.r.CourseReviews(ctx, payload.CourseID)
+	if err == nil {
+		for _, r := range existingReviews {
+			if r.UserID == userID {
+				return errors.New("user has already reviewed this course")
+			}
+		}
+	}
+
 	courseReview := &models.CourseReview{
 		UserID:   userID,
 		CourseID: courseID,

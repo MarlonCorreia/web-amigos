@@ -35,13 +35,21 @@ func (h *CourseHandler) GetReviews(w http.ResponseWriter, r *http.Request) {
 
 func (h *CourseHandler) GetCourseContent(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
+	userRole := RetrieveUserRole(r.Context())
 	courseID := chi.URLParam(r, "courseID")
 
-	active, err := h.enrollS.HasActiveEnrollment(r.Context(), userID, courseID)
-	if err != nil {
-		http.Error(w, "failed to verify enrollment", http.StatusInternalServerError)
-		return
+	var active bool
+	var err error
+	if userRole == "admin" || userRole == "creator" {
+		active = true
+	} else {
+		active, err = h.enrollS.HasActiveEnrollment(r.Context(), userID, courseID)
+		if err != nil {
+			http.Error(w, "failed to verify enrollment", http.StatusInternalServerError)
+			return
+		}
 	}
+
 	if !active {
 		http.Error(w, "access denied: no active enrollment for this course", http.StatusForbidden)
 		return
@@ -138,6 +146,12 @@ func (h *CourseHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CourseHandler) UpdateCourse(w http.ResponseWriter, r *http.Request) {
+	userRole := RetrieveUserRole(r.Context())
+	if userRole != "admin" && userRole != "creator" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	courseID := chi.URLParam(r, "courseID")
 	var payload models.UpdateCourseRequest
 
@@ -164,6 +178,12 @@ func (h *CourseHandler) UpdateCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CourseHandler) PublishCourse(w http.ResponseWriter, r *http.Request) {
+	userRole := RetrieveUserRole(r.Context())
+	if userRole != "admin" && userRole != "creator" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	courseID := chi.URLParam(r, "courseID")
 
 	err := uuid.Validate(courseID)
@@ -185,6 +205,12 @@ func (h *CourseHandler) PublishCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *CourseHandler) DeleteCourse(w http.ResponseWriter, r *http.Request) {
+	userRole := RetrieveUserRole(r.Context())
+	if userRole != "admin" && userRole != "creator" {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	courseID := chi.URLParam(r, "courseID")
 	err := uuid.Validate(courseID)
 	if err != nil {

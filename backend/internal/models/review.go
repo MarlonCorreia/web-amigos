@@ -8,9 +8,9 @@ import (
 
 type CourseReview struct {
 	ID        uuid.UUID `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	CourseID  uuid.UUID `json:"course_id" gorm:"type:uuid;not null"`
+	CourseID  uuid.UUID `json:"course_id" gorm:"type:uuid;not null;uniqueIndex:idx_user_course"`
 	Course    *Course   `json:"course,omitempty" gorm:"foreignKey:CourseID"`
-	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;not null;uniqueIndex:idx_user_course"`
 	User      *User     `json:"user,omitempty" gorm:"foreignKey:UserID"`
 	Rating    int       `json:"rating" gorm:"not null;check:rating >= 1 AND rating <= 5"`
 	Comment   string    `json:"comment" gorm:"type:text"`
