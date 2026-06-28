@@ -37,7 +37,7 @@ func main() {
 	reviewService := service.NewReviewService(reviewRepo, enrollRepo)
 	reviewHandler := handler.NewReviewHandler(reviewService)
 
-	enrollService := service.NewEnrollmentService(enrollRepo, env.FrontendURL)
+	enrollService := service.NewEnrollmentService(enrollRepo, env.FrontendURL, env.BaseURL)
 	enrollHandler := handler.NewEnrollmentHandler(enrollService)
 
 	courseRepo := repository.NewCourseRepository(db)

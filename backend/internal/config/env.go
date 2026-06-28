@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -9,6 +10,7 @@ import (
 
 type EnvConfig struct {
 	APIPort        string
+	BaseURL        string
 	DatabaseURL    string
 	JWTSecret      string
 	AllowedOrigins string
@@ -24,6 +26,11 @@ func LoadEnv() *EnvConfig {
 	port := os.Getenv("API_PORT")
 	if port == "" {
 		port = "8080"
+	}
+
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = fmt.Sprintf("http://localhost:%s", port)
 	}
 
 	dbURL := os.Getenv("DATABASE_URL")
@@ -48,6 +55,7 @@ func LoadEnv() *EnvConfig {
 
 	return &EnvConfig{
 		APIPort:        port,
+		BaseURL:        baseURL,
 		DatabaseURL:    dbURL,
 		JWTSecret:      jwtSecret,
 		AllowedOrigins: allowedOrigins,

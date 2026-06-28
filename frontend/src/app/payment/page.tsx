@@ -1,3 +1,4 @@
+const BASE_URL = import.meta.env.VITE_API_URL
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
@@ -72,7 +73,7 @@ export default function PaymentPage() {
       setCourse(courseData)
       
       // 3. Build QR Code pointing directly to backend GET activation URL
-      const activationUrl = `http://localhost:8080/webhooks/gateway?transaction_id=${transactionID}`
+      const activationUrl = `${BASE_URL}/webhooks/gateway?transaction_id=${transactionID}`
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(activationUrl)}`
       setQrCodeUrl(qrUrl)
       setStatus('pending')
@@ -138,7 +139,7 @@ export default function PaymentPage() {
     try {
       // Fetch the backend automatic GET activation endpoint
       const response = await fetch(
-        `http://localhost:8080/webhooks/gateway?transaction_id=${transactionID}`
+        `${BASE_URL}/webhooks/gateway?transaction_id=${transactionID}`
       )
       
       if (!response.ok) {

@@ -13,12 +13,13 @@ import (
 )
 
 type EnrollmentService struct {
-	enrollRepo repository.EnrollmentRepository
-	frontendURL    string
+	enrollRepo  repository.EnrollmentRepository
+	frontendURL string
+	baseURL     string
 }
 
-func NewEnrollmentService(enrollRepo repository.EnrollmentRepository, frontendURL string) *EnrollmentService {
-	return &EnrollmentService{enrollRepo: enrollRepo, frontendURL: frontendURL}
+func NewEnrollmentService(enrollRepo repository.EnrollmentRepository, frontendURL string, baseURL string) *EnrollmentService {
+	return &EnrollmentService{enrollRepo: enrollRepo, frontendURL: frontendURL, baseURL: baseURL}
 }
 
 type EnrollResponse struct {
@@ -94,7 +95,7 @@ func (s *EnrollmentService) HasActiveEnrollment(ctx context.Context, userID, cou
 }
 
 func (s *EnrollmentService) buildEnrollResponse(transactionID, status string) *EnrollResponse {
-	paymentURL := fmt.Sprintf("http://localhost:8080/webhooks/gateway?transaction_id=%s", transactionID)
+	paymentURL := fmt.Sprintf("%s/webhooks/gateway?transaction_id=%s", s.baseURL, transactionID)
 	qrCodeURL := "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + url.QueryEscape(paymentURL)
 	return &EnrollResponse{
 		TransactionID: transactionID,
