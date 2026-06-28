@@ -104,6 +104,7 @@ export default function CourseDetailsPage() {
   useEffect(() => {
     if (authLoading) return
     if (!id) return
+    const courseId = id
 
     async function loadData() {
       try {
@@ -111,12 +112,12 @@ export default function CourseDetailsPage() {
         setLoading(true)
 
         // 1. Fetch course details
-        const details = await getCourseDetails(id)
+        const details = await getCourseDetails(courseId)
         setCourse(details)
 
         // 2. Fetch reviews
         try {
-          const courseReviews = await getCourseReviews(id)
+          const courseReviews = await getCourseReviews(courseId)
           setReviews(courseReviews)
         } catch (revErr) {
           console.warn('Erro ao carregar avaliações:', revErr)
@@ -126,7 +127,7 @@ export default function CourseDetailsPage() {
         let enrolled = false
         if (isAuthenticated) {
           try {
-            const status = await getEnrollmentStatus(id)
+            const status = await getEnrollmentStatus(courseId)
             if (status && status.Status === 'active') {
               enrolled = true
               setIsEnrolled(true)
@@ -139,7 +140,7 @@ export default function CourseDetailsPage() {
 
         if (enrolled) {
           // If enrolled, load private content in one call
-          const content = await getCourseContent(id)
+          const content = await getCourseContent(courseId)
 
           const mappedMods: MappedModule[] = (content.Modules || []).map((m: any) => ({
             id: m.ID,
@@ -168,7 +169,7 @@ export default function CourseDetailsPage() {
           }
         } else {
           // If not enrolled or logged out, build syllabus from public modules & lessons
-          const publicMods = await getCourseModules(id)
+          const publicMods = await getCourseModules(courseId)
 
           const mappedMods: MappedModule[] = await Promise.all(
             publicMods.map(async (mod) => {
@@ -994,7 +995,7 @@ export default function CourseDetailsPage() {
         {/* Lista de Outras Avaliações */}
         {(() => {
           const myReview = user ? reviews.find((r) => r.user_id === user.id) : null
-          const listReviews = myReview ? reviews.filter((r) => r.user_id !== user.id) : reviews
+          const listReviews = myReview ? reviews.filter((r) => r.user_id !== myReview.user_id) : reviews
           const title = myReview ? `Outras Avaliações (${listReviews.length})` : `Avaliações dos Alunos (${reviews.length})`
 
           return (

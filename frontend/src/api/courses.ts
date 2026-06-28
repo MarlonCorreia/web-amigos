@@ -7,6 +7,7 @@ export interface CourseResponse {
   title: string
   description: string
   thumbnail_url: string
+  gateway_product_id?: string
   price: number
   access_duration_days: number
   is_published: boolean

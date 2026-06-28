@@ -175,7 +175,7 @@ export default function ManageUsersPage() {
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card
             sx={{
               borderRadius: '16px',
@@ -206,7 +206,7 @@ export default function ManageUsersPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card
             sx={{
               borderRadius: '16px',
@@ -237,7 +237,7 @@ export default function ManageUsersPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card
             sx={{
               borderRadius: '16px',
@@ -268,7 +268,7 @@ export default function ManageUsersPage() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card
             sx={{
               borderRadius: '16px',
@@ -324,7 +324,7 @@ export default function ManageUsersPage() {
       >
         <Box sx={{ p: 3, backgroundColor: 'background.paper' }}>
           <Grid container spacing={2} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Grid xs={12} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <TextField
                 fullWidth
                 placeholder="Buscar usuário por nome ou e-mail..."

@@ -19,7 +19,6 @@ import {
   Chip,
   Stack,
   Divider,
-  Paper,
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -225,7 +224,7 @@ export default function ProfilePage() {
 
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid xs={12}>
+              <Grid size={12}>
                 <TextField
                   fullWidth
                   label="Nome Completo"
@@ -237,14 +236,14 @@ export default function ProfilePage() {
                 />
               </Grid>
 
-              <Grid xs={12}>
+              <Grid size={12}>
                 <Divider sx={{ my: 1 }} />
                 <Typography variant="subtitle1" sx={{ fontWeight: '600', mt: 1, color: 'text.secondary' }}>
                   Alterar Senha (deixe em branco para não alterar)
                 </Typography>
               </Grid>
 
-              <Grid xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
                   label="Nova Senha"
@@ -257,7 +256,7 @@ export default function ProfilePage() {
                 />
               </Grid>
 
-              <Grid xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   fullWidth
                   label="Confirmar Nova Senha"
@@ -270,7 +269,7 @@ export default function ProfilePage() {
                 />
               </Grid>
 
-              <Grid xs={12} sx={{ mt: 2 }}>
+              <Grid size={12} sx={{ mt: 2 }}>
                 <Button
                   type="submit"
                   variant="contained"

@@ -11,7 +11,6 @@ import {
   Divider,
   Alert,
   Stack,
-  Chip,
   CardMedia,
 } from '@mui/material'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined'
@@ -45,7 +44,7 @@ export default function PaymentPage() {
   // Simulation states
   const [simulating, setSimulating] = useState(false)
   
-  const pollingRef = useRef<NodeJS.Timeout | null>(null)
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Fetch initial transaction info & course details
   const fetchTransactionAndCourse = async () => {
@@ -222,7 +221,7 @@ export default function PaymentPage() {
       ) : (
         <Grid container spacing={4} sx={{ alignItems: 'flex-start' }}>
           {/* LEFT COLUMN: Payment Pix details */}
-          <Grid item xs={12} md={7}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Paper elevation={0} variant="outlined" sx={{ p: 4, borderRadius: 4, border: '1px solid #e5e7eb' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                 <PixIcon sx={{ color: '#32bcad', fontSize: 32 }} />
@@ -301,7 +300,7 @@ export default function PaymentPage() {
           </Grid>
 
           {/* RIGHT COLUMN: Order Summary */}
-          <Grid item xs={12} md={5}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <Paper elevation={0} variant="outlined" sx={{ p: 4, borderRadius: 4, border: '1px solid #e5e7eb', bgcolor: '#f9fafb' }}>
               <Typography variant="h6" sx={{ fontWeight: 800, mb: 3, color: '#111827' }}>
                 Resumo da Compra

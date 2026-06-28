@@ -46,6 +46,7 @@ import {
   updateCourse,
   deleteCourse,
   publishCourse,
+  getCourseDetails,
   getCourseModules,
   getModuleLessons,
   createModule,
@@ -244,7 +245,7 @@ export default function ManageCoursesPage() {
   const fetchGatewayProductId = async (courseId: string) => {
     try {
       const details = await getCourseDetails(courseId)
-      setCourseGatewayId(details.gateway_product_id)
+      setCourseGatewayId(details.gateway_product_id ?? 'prod_learnlab')
     } catch (err) {
       console.error('Erro ao obter detalhes adicionais do curso:', err)
       setCourseGatewayId('prod_learnlab')
